@@ -7,7 +7,7 @@ import PreviewSection from '@/components/PreviewSection';
 import ViralMode from '@/components/ViralMode';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { generateScript, refinePrompt } from '@/app/actions/gemini';
-import { generateImage, animateVideo } from '@/app/actions/replicate';
+import { generateImage, generateAudio, startVideoGeneration, checkPredictionStatus } from '@/app/actions/replicate';
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -119,35 +119,65 @@ export default function Home() {
     setGeneratedVideo(undefined);
 
     try {
-      // 1. Use the approved prompt
+      // 1. Image Generation
       const imagePrompt = formData.prompt;
-      console.log("Approved Prompt:", imagePrompt);
-
-      // 2. Generate Image
       setStatusMessage(language === 'pt' ? "Gerando imagem 3D..." : "Generating 3D image...");
-      const imageResult = await generateImage(imagePrompt);
 
-      if (!imageResult.success || !imageResult.imageUrl) {
-        throw new Error(imageResult.error || "Falha na geração da imagem");
-      }
+      // Check if we already have an image (optional optimization, but let's regenerate to be safe or use state if logic permitted)
+      // For now, simpler to regenerate or we could skip if generatedImage is already set and matches prompt.
+      // Let's regenerate to ensure freshness.
+      const imageResult = await generateImage(imagePrompt);
+      if (!imageResult.success || !imageResult.imageUrl) throw new Error(imageResult.error || "Falha na imagem");
 
       const imageUrl = imageResult.imageUrl;
       setGeneratedImage(imageUrl);
 
-      // 3. Animate Video
-      setStatusMessage(language === 'pt' ? "Animando vídeo (Lip-Sync)..." : "Animating video (Lip-Sync)...");
-      const videoResult = await animateVideo(imageUrl, formData.script);
+      // 2. Audio Generation
+      setStatusMessage(language === 'pt' ? "Gerando áudio (TTS)..." : "Generating audio (TTS)...");
+      // Need to import generateAudio from replicate.ts first!
+      // I will update the import statement separately or trust global replacement if I do it right.
+      // Actually, I need to update the imports in this file too.
+      // For now, assume import is updated.
+      const audioResult = await generateAudio(formData.script);
+      if (!audioResult.success || !audioResult.audioUrl) throw new Error(audioResult.error || "Falha no áudio");
 
-      if (!videoResult.success || !videoResult.videoUrl) {
-        throw new Error(videoResult.error || "Falha na animação do vídeo");
+      const audioUrl = audioResult.audioUrl;
+
+      // 3. Start Video Generation
+      setStatusMessage(language === 'pt' ? "Iniciando vídeo (SadTalker)..." : "Starting video generation...");
+      const videoInit = await startVideoGeneration(imageUrl, audioUrl);
+      if (!videoInit.success || !videoInit.predictionId) throw new Error(videoInit.error || "Falha ao iniciar vídeo");
+
+      const predictionId = videoInit.predictionId;
+
+      // 4. Polling Loop
+      let isProcessing = true;
+      while (isProcessing) {
+        // Wait 4 seconds
+        await new Promise(resolve => setTimeout(resolve, 4000));
+
+        setStatusMessage(language === 'pt' ? "Processando vídeo... (Isso pode levar alguns minutos)" : "Processing video... (This make take a few minutes)");
+
+        const statusResult = await checkPredictionStatus(predictionId);
+
+        if (!statusResult.success) {
+          throw new Error(statusResult.error || "Erro ao verificar status");
+        }
+
+        if (statusResult.status === 'succeeded') {
+          isProcessing = false;
+          const videoOutput = statusResult.output;
+          const videoUrl = typeof videoOutput === 'string' ? videoOutput : (Array.isArray(videoOutput) ? videoOutput[0] : (videoOutput as any)?.video || videoOutput);
+          setGeneratedVideo(videoUrl);
+          setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
+        } else if (statusResult.status === 'failed' || statusResult.status === 'canceled') {
+          isProcessing = false;
+          throw new Error(statusResult.error || "Geração de vídeo falhou");
+        } else {
+          // Still processing
+          console.log("Still processing video...");
+        }
       }
-
-      // Helper to extract URL from Replicate output
-      const videoOutput = videoResult.videoUrl;
-      const videoUrl = typeof videoOutput === 'string' ? videoOutput : (Array.isArray(videoOutput) ? videoOutput[0] : (videoOutput as any)?.video || videoOutput);
-
-      setGeneratedVideo(videoUrl);
-      setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
 
     } catch (e: any) {
       console.error(e);

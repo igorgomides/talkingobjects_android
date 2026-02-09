@@ -96,17 +96,16 @@ export async function generateImage(prompt: string) {
     }
 }
 
-export async function animateVideo(imageUrl: string, script: string) {
-    console.log("Starting animateVideo...");
-    console.log("Image URL:", imageUrl);
+// 1. Generate Audio (Fast enough to await, usually < 15s)
+export async function generateAudio(script: string) {
+    console.log("Starting generateAudio...");
 
     if (!process.env.REPLICATE_API_TOKEN) {
         return { success: false, error: "Token do Replicate não configurado no servidor." };
     }
 
     try {
-        console.log("Step 1: Generating Audio (Bark)...");
-        // TTS: suno-ai/bark (Reverted to Bark as XTTS requires file inputs for speaker)
+        // TTS: suno-ai/bark
         // Hash: b76242b40d67c76ab6742e987628a2a9ac019e11d56ab96c4e91ce03b79b2787
         let ttsOutput;
         try {
@@ -125,48 +124,79 @@ export async function animateVideo(imageUrl: string, script: string) {
             return { success: false, error: `Erro no Audio (Bark): ${ttsError.message}` };
         }
 
-        // Bark output can be object or string
         const audioUrl = (typeof ttsOutput === 'object' && ttsOutput.audio_out) ? ttsOutput.audio_out : ttsOutput;
         console.log("Audio generated:", audioUrl);
 
         if (!audioUrl) return { success: false, error: "Falha ao gerar áudio (TTS retornou vazio)" };
 
-        console.log("Step 2: Generating Video (SadTalker - Lucataco)...");
-        // Video: lucataco/sadtalker (Alternative Implementation)
+        return { success: true, audioUrl: audioUrl };
+
+    } catch (error: any) {
+        console.error("Erro em generateAudio:", error);
+        return { success: false, error: `Erro geral no áudio: ${error.message}` };
+    }
+}
+
+// 2. Start Video Generation (Returns ID immediately, preventing Timeout)
+export async function startVideoGeneration(imageUrl: string, audioUrl: string) {
+    console.log("Starting startVideoGeneration...");
+
+    if (!process.env.REPLICATE_API_TOKEN) {
+        return { success: false, error: "Token do Replicate não configurado no servidor." };
+    }
+
+    try {
+        // Video: lucataco/sadtalker
         // Hash: 85c698db7c0a66d5011435d0191db323034e1da04b912a6d365833141b6a285b
-        try {
-            const videoOutput = await runWithRetry(
-                "lucataco/sadtalker:85c698db7c0a66d5011435d0191db323034e1da04b912a6d365833141b6a285b",
-                {
-                    input: {
-                        source_image: imageUrl,
-                        driven_audio: audioUrl,
-                        still: true,
-                        enhancer: "gfpgan",
-                        preprocess: "full"
-                    }
-                }
-            );
-            console.log("Video generated:", videoOutput);
+        const modelString = "lucataco/sadtalker:85c698db7c0a66d5011435d0191db323034e1da04b912a6d365833141b6a285b";
 
-            // Helper to extract URL from Replicate output if needed, but runWithRetry should already process it.
-            // However, runWithRetry returns 'output'. For SadTalker, it might be the URL string or object.
-            // Let's assume it's the output we want.
-            return { success: true, videoUrl: videoOutput };
+        // Extract version hash from model string
+        const parts = modelString.split(':');
+        const version = parts.length > 1 ? parts[parts.length - 1] : modelString;
 
-        } catch (videoError: any) {
-            console.error("Video Error:", videoError);
-            return { success: false, error: `Erro na Animação (SadTalker): ${videoError.message}` };
+        // Start prediction ONLY (no await result)
+        const prediction = await replicate.predictions.create({
+            version: version,
+            input: {
+                source_image: imageUrl,
+                driven_audio: audioUrl,
+                still: true,
+                enhancer: "gfpgan",
+                preprocess: "full"
+            }
+        });
+
+        console.log(`Video Prediction Started: ${prediction.id}`);
+        return { success: true, predictionId: prediction.id };
+
+    } catch (error: any) {
+        console.error("Erro em startVideoGeneration:", error);
+        return { success: false, error: `Erro ao iniciar vídeo: ${error.message}` };
+    }
+}
+
+// 3. Check Status (Polling)
+export async function checkPredictionStatus(predictionId: string) {
+    if (!process.env.REPLICATE_API_TOKEN) {
+        return { success: false, error: "Token do Replicate não configurado." };
+    }
+
+    try {
+        const prediction = await replicate.predictions.get(predictionId);
+        console.log(`Checking status for ${predictionId}: ${prediction.status}`);
+
+        if (prediction.status === 'succeeded') {
+            return { success: true, status: 'succeeded', output: prediction.output };
+        } else if (prediction.status === 'failed') {
+            return { success: false, status: 'failed', error: prediction.error || "Erro desconhecido no Replicate" };
+        } else if (prediction.status === 'canceled') {
+            return { success: false, status: 'canceled', error: "Predição cancelada" };
+        } else {
+            return { success: true, status: prediction.status }; // starting, processing
         }
 
     } catch (error: any) {
-        console.error("Erro em animateVideo:", error);
-        const errorMessage = error.message || JSON.stringify(error);
-
-        if (errorMessage.includes("422")) {
-            return { success: false, error: `Erro de Versão do Modelo (422). Verifique se o modelo ainda existe ou se a hash mudou.` };
-        }
-
-        return { success: false, error: `Erro geral na animação: ${errorMessage}` };
+        console.error("Erro em checkPredictionStatus:", error);
+        return { success: false, error: `Erro ao verificar status: ${error.message}` };
     }
 }
