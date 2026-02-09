@@ -1,65 +1,217 @@
-import Image from "next/image";
+
+"use client";
+
+import { useState } from 'react';
+import CreationForm from '@/components/CreationForm';
+import PreviewSection from '@/components/PreviewSection';
+import ViralMode from '@/components/ViralMode';
+import { Sparkles, AlertCircle } from 'lucide-react';
+import { generateScript, refinePrompt } from '@/app/actions/gemini';
+import { generateImage, animateVideo } from '@/app/actions/replicate';
 
 export default function Home() {
+  const [formData, setFormData] = useState({
+    objectName: '',
+    emotion: 'Com muita Raiva', // Default will be updated by effect based on lang
+    reason: '',
+    script: '',
+    prompt: ''
+  });
+
+  // Language State (Default: English)
+  const [language, setLanguage] = useState<'en' | 'pt'>('en');
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const [isRefiningPrompt, setIsRefiningPrompt] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | undefined>(undefined);
+  const [generatedVideo, setGeneratedVideo] = useState<string | undefined>(undefined);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  // New state for Gemini Model selection
+  const [geminiModel, setGeminiModel] = useState("gemini-2.5-flash");
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'pt' : 'en');
+  };
+
+  const handleViralMode = () => {
+    if (language === 'pt') {
+      setFormData({
+        objectName: "Salgadinho Brasileiro (Coxinha)",
+        emotion: "Com muita Raiva",
+        reason: "Ser mordido por um gigante",
+        script: "Eu não acredito! Você vai me comer? Logo eu, recheada de amor e catupiry? Isso é um absurdo! A revolução das coxinhas vai começar!",
+        prompt: ""
+      });
+    } else {
+      setFormData({
+        objectName: "Brazilian Snack (Coxinha)",
+        emotion: "Very Angry",
+        reason: "Being bitten by a giant",
+        script: "I can't believe it! You're going to eat me? Me, filled with love and cream cheese? This is absurd! The Coxinha revolution starts now!",
+        prompt: ""
+      });
+    }
+  };
+
+  const handleGenerateScript = async () => {
+    if (!formData.objectName || !formData.emotion || !formData.reason) {
+      setError(language === 'pt' ? "Preencha Objeto, Emoção e Motivo primeiro." : "Please fill in Object, Emotion, and Reason first.");
+      return;
+    }
+    setError(null);
+    setIsGeneratingScript(true);
+    try {
+      // Pass the selected model and language
+      const script = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
+      setFormData(prev => ({ ...prev, script }));
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
+    } finally {
+      setIsGeneratingScript(false);
+    }
+  };
+
+  const handleRefinePrompt = async () => {
+    if (!formData.objectName || !formData.emotion || !formData.reason) {
+      setError(language === 'pt' ? "Preencha Objeto, Emoção e Motivo primeiro." : "Please fill in Object, Emotion, and Reason first.");
+      return;
+    }
+    setError(null);
+    setIsRefiningPrompt(true);
+    try {
+      // Pass the selected model (prompt is always English so language param might be redundant for prompt, but kept for consistency if needed)
+      // Actually prompt generation logic in gemini.ts is English focused, but we might want to pass 'en' to ensure it stays English.
+      const prompt = await refinePrompt(formData.objectName, formData.emotion, formData.reason, geminiModel);
+      setFormData(prev => ({ ...prev, prompt }));
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
+    } finally {
+      setIsRefiningPrompt(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.script) {
+      setError(language === 'pt' ? "O roteiro é obrigatório." : "Script is required.");
+      return;
+    }
+    if (!formData.prompt) {
+      setError(language === 'pt' ? "Por favor, gere e aprove o prompt da imagem antes de continuar." : "Please generate and approve the image prompt before continuing.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setGeneratedImage(undefined);
+    setGeneratedVideo(undefined);
+
+    try {
+      // 1. Use the approved prompt
+      const imagePrompt = formData.prompt;
+      console.log("Approved Prompt:", imagePrompt);
+
+      // 2. Generate Image
+      setStatusMessage(language === 'pt' ? "Gerando imagem 3D..." : "Generating 3D image...");
+      const imageUrl = await generateImage(imagePrompt) as unknown as string;
+      setGeneratedImage(imageUrl);
+
+      // 3. Animate Video
+      setStatusMessage(language === 'pt' ? "Animando vídeo (Lip-Sync)..." : "Animating video (Lip-Sync)...");
+      const videoOutput = await animateVideo(imageUrl, formData.script);
+      // Helper to extract URL from Replicate output
+      const videoUrl = typeof videoOutput === 'string' ? videoOutput : (Array.isArray(videoOutput) ? videoOutput[0] : (videoOutput as any)?.video || videoOutput);
+
+      setGeneratedVideo(videoUrl);
+      setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
+
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || (language === 'pt' ? "Erro durante o processo." : "Error during the process."));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="max-w-4xl mx-auto flex flex-col items-center gap-8">
+
+        <header className="text-center space-y-2 relative w-full flex flex-col items-center">
+          {/* Language Toggle */}
+          <button
+            onClick={toggleLanguage}
+            className="absolute top-0 right-0 p-2 bg-gray-800 rounded-full border border-gray-600 hover:border-white transition-colors flex items-center gap-2 text-xs font-bold text-white"
+          >
+            <span>{language === 'en' ? '🇺🇸 EN' : '🇧🇷 PT'}</span>
+          </button>
+
+          <div className="inline-flex items-center justify-center p-3 bg-purple-900/50 rounded-full mb-4 ring-1 ring-purple-500">
+            <Sparkles className="text-purple-300 mr-2" />
+            <span className="text-purple-200 font-bold tracking-wider text-sm">GEMINI EDITION</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-lg">
+            Talking Objects
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-gray-300 text-lg">
+            {language === 'pt' ? "Crie vídeos virais para Reels com IA 🤖✨" : "Create viral AI videos for Reels 🤖✨"}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        </header>
+
+        <ViralMode onActivate={handleViralMode} language={language} />
+
+        {error && (
+          <div className="w-full bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg flex items-center gap-2 animate-bounce">
+            <AlertCircle size={20} />
+            {error}
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-8 w-full">
+          <div className="flex flex-col gap-4 order-2 md:order-1">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              1. {language === 'pt' ? "Configuração" : "Configuration"} 🛠️
+            </h2>
+            <CreationForm
+              formData={formData}
+              setFormData={setFormData}
+              onSubmit={handleSubmit}
+              onGenerateScript={handleGenerateScript}
+              onRefinePrompt={handleRefinePrompt}
+              isGeneratingScript={isGeneratingScript}
+              isRefiningPrompt={isRefiningPrompt}
+              isLoading={isLoading}
+              geminiModel={geminiModel}
+              setGeminiModel={setGeminiModel}
+              language={language}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          <div className="flex flex-col gap-4 order-1 md:order-2">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              2. {language === 'pt' ? "Resultado" : "Result"} 🎬
+            </h2>
+            <div className="sticky top-8 space-y-2">
+              {isLoading && <p className="text-purple-400 text-center animate-pulse">{statusMessage}</p>}
+              <PreviewSection
+                imageUrl={generatedImage}
+                videoUrl={generatedVideo}
+                isGenerating={isLoading}
+              />
+            </div>
+          </div>
         </div>
+
       </main>
+
+      <footer className="mt-16 text-center text-gray-500 text-sm">
+        Powered by Google Gemini Pro & Replicate
+      </footer>
     </div>
   );
 }
