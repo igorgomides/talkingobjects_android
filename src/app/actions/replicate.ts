@@ -57,7 +57,9 @@ async function runWithRetry(modelString: string, inputWrapper: any, retries = 0)
 export async function generateImage(prompt: string) {
     console.log("Generating image with prompt:", prompt.substring(0, 50) + "...");
 
-    if (!process.env.REPLICATE_API_TOKEN) throw new Error("Token do Replicate não configurado");
+    if (!process.env.REPLICATE_API_TOKEN) {
+        return { success: false, error: "Token do Replicate não configurado no servidor." };
+    }
 
     // Switched to SDXL Lightning (Bytedance) - Faster & Standard URL output
     // Hash checked: 6f7a773af6fc3e8de9d5a3c00be77c17308914bf67772726aff83496ba1e3bbe
@@ -84,13 +86,13 @@ export async function generateImage(prompt: string) {
 
         if (typeof imageUrl !== 'string' || !imageUrl.startsWith('http')) {
             console.error("Invalid image URL:", imageUrl);
-            throw new Error("Formato de imagem inválido retornado pelo Replicate");
+            return { success: false, error: "Formato de imagem inválido retornado pelo Replicate" };
         }
 
-        return imageUrl;
+        return { success: true, imageUrl: imageUrl };
     } catch (error: any) {
         console.error("Erro detalhado do Replicate:", error);
-        throw new Error(`Falha no Replicate: ${error.message}`);
+        return { success: false, error: `Falha no Replicate: ${error.message}` };
     }
 }
 
@@ -98,7 +100,9 @@ export async function animateVideo(imageUrl: string, script: string) {
     console.log("Starting animateVideo...");
     console.log("Image URL:", imageUrl);
 
-    if (!process.env.REPLICATE_API_TOKEN) throw new Error("Token do Replicate não configurado");
+    if (!process.env.REPLICATE_API_TOKEN) {
+        return { success: false, error: "Token do Replicate não configurado no servidor." };
+    }
 
     try {
         console.log("Step 1: Generating Audio (Bark)...");
@@ -118,14 +122,14 @@ export async function animateVideo(imageUrl: string, script: string) {
             );
         } catch (ttsError: any) {
             console.error("TTS Error:", ttsError);
-            throw new Error(`Erro no Audio (Bark): ${ttsError.message}`);
+            return { success: false, error: `Erro no Audio (Bark): ${ttsError.message}` };
         }
 
         // Bark output can be object or string
         const audioUrl = (typeof ttsOutput === 'object' && ttsOutput.audio_out) ? ttsOutput.audio_out : ttsOutput;
         console.log("Audio generated:", audioUrl);
 
-        if (!audioUrl) throw new Error("Falha ao gerar áudio (TTS retornou vazio)");
+        if (!audioUrl) return { success: false, error: "Falha ao gerar áudio (TTS retornou vazio)" };
 
         console.log("Step 2: Generating Video (SadTalker - Lucataco)...");
         // Video: lucataco/sadtalker (Alternative Implementation)
@@ -144,11 +148,15 @@ export async function animateVideo(imageUrl: string, script: string) {
                 }
             );
             console.log("Video generated:", videoOutput);
-            return videoOutput;
+
+            // Helper to extract URL from Replicate output if needed, but runWithRetry should already process it.
+            // However, runWithRetry returns 'output'. For SadTalker, it might be the URL string or object.
+            // Let's assume it's the output we want.
+            return { success: true, videoUrl: videoOutput };
 
         } catch (videoError: any) {
             console.error("Video Error:", videoError);
-            throw new Error(`Erro na Animação (SadTalker): ${videoError.message}`);
+            return { success: false, error: `Erro na Animação (SadTalker): ${videoError.message}` };
         }
 
     } catch (error: any) {
@@ -156,9 +164,9 @@ export async function animateVideo(imageUrl: string, script: string) {
         const errorMessage = error.message || JSON.stringify(error);
 
         if (errorMessage.includes("422")) {
-            throw new Error(`Erro de Versão do Modelo (422). Verifique se o modelo ainda existe ou se a hash mudou.`);
+            return { success: false, error: `Erro de Versão do Modelo (422). Verifique se o modelo ainda existe ou se a hash mudou.` };
         }
 
-        throw error; // Re-throw the specific step error
+        return { success: false, error: `Erro geral na animação: ${errorMessage}` };
     }
 }

@@ -65,8 +65,12 @@ export default function Home() {
     setIsGeneratingScript(true);
     try {
       // Pass the selected model and language
-      const script = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
-      setFormData(prev => ({ ...prev, script }));
+      const result = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
+      if (result.success && result.script) {
+        setFormData(prev => ({ ...prev, script: result.script! }));
+      } else {
+        setError(result.error || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
+      }
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
@@ -83,10 +87,13 @@ export default function Home() {
     setError(null);
     setIsRefiningPrompt(true);
     try {
-      // Pass the selected model (prompt is always English so language param might be redundant for prompt, but kept for consistency if needed)
-      // Actually prompt generation logic in gemini.ts is English focused, but we might want to pass 'en' to ensure it stays English.
-      const prompt = await refinePrompt(formData.objectName, formData.emotion, formData.reason, geminiModel);
-      setFormData(prev => ({ ...prev, prompt }));
+      // Pass the selected model
+      const result = await refinePrompt(formData.objectName, formData.emotion, formData.reason, geminiModel);
+      if (result.success && result.prompt) {
+        setFormData(prev => ({ ...prev, prompt: result.prompt! }));
+      } else {
+        setError(result.error || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
+      }
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
@@ -118,13 +125,25 @@ export default function Home() {
 
       // 2. Generate Image
       setStatusMessage(language === 'pt' ? "Gerando imagem 3D..." : "Generating 3D image...");
-      const imageUrl = await generateImage(imagePrompt) as unknown as string;
+      const imageResult = await generateImage(imagePrompt);
+
+      if (!imageResult.success || !imageResult.imageUrl) {
+        throw new Error(imageResult.error || "Falha na geração da imagem");
+      }
+
+      const imageUrl = imageResult.imageUrl;
       setGeneratedImage(imageUrl);
 
       // 3. Animate Video
       setStatusMessage(language === 'pt' ? "Animando vídeo (Lip-Sync)..." : "Animating video (Lip-Sync)...");
-      const videoOutput = await animateVideo(imageUrl, formData.script);
+      const videoResult = await animateVideo(imageUrl, formData.script);
+
+      if (!videoResult.success || !videoResult.videoUrl) {
+        throw new Error(videoResult.error || "Falha na animação do vídeo");
+      }
+
       // Helper to extract URL from Replicate output
+      const videoOutput = videoResult.videoUrl;
       const videoUrl = typeof videoOutput === 'string' ? videoOutput : (Array.isArray(videoOutput) ? videoOutput[0] : (videoOutput as any)?.video || videoOutput);
 
       setGeneratedVideo(videoUrl);

@@ -31,7 +31,9 @@ export async function generateScript(objectName: string, emotion: string, reason
   console.log("Using Gemini Model:", modelName);
   console.log("Language:", language);
 
-  if (!apiKey) throw new Error("API Key do Gemini não configurada (vazia)");
+  if (!apiKey) {
+    return { success: false, error: "API Key do Gemini não configurada (vazia) no servidor." };
+  }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
@@ -55,16 +57,21 @@ export async function generateScript(objectName: string, emotion: string, reason
   `;
 
   try {
-    return await runGenerativeContentWithRetry(model, prompt);
+    const text = await runGenerativeContentWithRetry(model, prompt);
+    return { success: true, script: text };
   } catch (error: any) {
     console.error("Erro ao gerar roteiro:", error);
+    let errorMessage = "Falha ao gerar roteiro com Gemini";
+
     if (error.status === 429 || error.message?.includes("429")) {
-      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
+      errorMessage = `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`;
+    } else if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
+      errorMessage = `Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.`;
+    } else if (error.message) {
+      errorMessage = error.message;
     }
-    if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.`);
-    }
-    throw new Error("Falha ao gerar roteiro com Gemini");
+
+    return { success: false, error: errorMessage };
   }
 }
 
@@ -72,7 +79,9 @@ export async function refinePrompt(objectName: string, emotion: string, reason: 
   console.log("Refining prompt...");
   console.log("Using Gemini Model:", modelName);
 
-  if (!apiKey) throw new Error("API Key do Gemini não configurada");
+  if (!apiKey) {
+    return { success: false, error: "API Key do Gemini não configurada no servidor." };
+  }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
@@ -97,15 +106,20 @@ export async function refinePrompt(objectName: string, emotion: string, reason: 
   `;
 
   try {
-    return await runGenerativeContentWithRetry(model, prompt);
+    const text = await runGenerativeContentWithRetry(model, prompt);
+    return { success: true, prompt: text };
   } catch (error: any) {
     console.error("Erro ao refinar prompt:", error);
+    let errorMessage = "Falha ao refinar prompt com Gemini";
+
     if (error.status === 429 || error.message?.includes("429")) {
-      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
+      errorMessage = `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`;
+    } else if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
+      errorMessage = `Modelo ${modelName} não disponível. Tente 'gemini-pro'.`;
+    } else if (error.message) {
+      errorMessage = error.message;
     }
-    if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-pro'.`);
-    }
-    throw new Error("Falha ao refinar prompt com Gemini");
+
+    return { success: false, error: errorMessage };
   }
 }
