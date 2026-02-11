@@ -31,9 +31,7 @@ export async function generateScript(objectName: string, emotion: string, reason
   console.log("Using Gemini Model:", modelName);
   console.log("Language:", language);
 
-  if (!apiKey) {
-    return { success: false, error: "API Key do Gemini não configurada (vazia) no servidor." };
-  }
+  if (!apiKey) throw new Error("API Key do Gemini não configurada (vazia)");
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
@@ -57,38 +55,31 @@ export async function generateScript(objectName: string, emotion: string, reason
   `;
 
   try {
-    const text = await runGenerativeContentWithRetry(model, prompt);
-    return { success: true, script: text };
+    return await runGenerativeContentWithRetry(model, prompt);
   } catch (error: any) {
     console.error("Erro ao gerar roteiro:", error);
-    let errorMessage = "Falha ao gerar roteiro com Gemini";
-
     if (error.status === 429 || error.message?.includes("429")) {
-      errorMessage = `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`;
-    } else if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      errorMessage = `Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.`;
-    } else if (error.message) {
-      errorMessage = error.message;
+      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
     }
-
-    return { success: false, error: errorMessage };
+    if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
+      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.`);
+    }
+    throw new Error("Falha ao gerar roteiro com Gemini");
   }
 }
 
-export async function refinePrompt(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash") {
-  console.log("Refining prompt...");
+export async function refinePromptV2(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash") {
+  console.log("Refining prompt [V2 - Restaurant]...");
   console.log("Using Gemini Model:", modelName);
 
-  if (!apiKey) {
-    return { success: false, error: "API Key do Gemini não configurada no servidor." };
-  }
+  if (!apiKey) throw new Error("API Key do Gemini não configurada");
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
 
-  const systemInstruction = `
+  const instructionV2 = `
     Você é um especialista em prompts para geradores de imagem 3D. O usuário fornecerá um objeto e uma emoção. Sua saída deve ser APENAS o prompt em inglês, seguindo esta estrutura estrita:
-    'A 3D render of a [Objeto] character with a face, looking strictly at the camera. The character is expressing [Emoção] because of [Motivo]. Pixar style, high detail, studio lighting, plain blurred background, vertical 9:16 aspect ratio. Create a central composition.'
+    'A 3D render of a [Objeto] character with a face, standing on a wooden restaurant table, facing the camera directly. The character has LARGE, DISTINCT EYES and a MOUTH. It is expressing [Emoção] because of [Motivo]. Pixar style, high detail, studio lighting. The background is a slightly out-of-focus restaurant setting with a family sitting in the background, providing context but keeping the object as the main focus. Close-up shot, centered composition, making sure the face is the primary focus. Vertical 9:16 aspect ratio.'
     
     IMPORTANT SAFETY GUIDELINES:
     - Ensure the prompt is 100% Safe For Work (SFW).
@@ -98,7 +89,7 @@ export async function refinePrompt(objectName: string, emotion: string, reason: 
   `;
 
   const prompt = `
-    ${systemInstruction}
+    ${instructionV2}
     
     Object: ${objectName}
     Emotion: ${emotion}
@@ -106,20 +97,15 @@ export async function refinePrompt(objectName: string, emotion: string, reason: 
   `;
 
   try {
-    const text = await runGenerativeContentWithRetry(model, prompt);
-    return { success: true, prompt: text };
+    return await runGenerativeContentWithRetry(model, prompt);
   } catch (error: any) {
     console.error("Erro ao refinar prompt:", error);
-    let errorMessage = "Falha ao refinar prompt com Gemini";
-
     if (error.status === 429 || error.message?.includes("429")) {
-      errorMessage = `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`;
-    } else if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      errorMessage = `Modelo ${modelName} não disponível. Tente 'gemini-pro'.`;
-    } else if (error.message) {
-      errorMessage = error.message;
+      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
     }
-
-    return { success: false, error: errorMessage };
+    if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
+      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-pro'.`);
+    }
+    throw new Error("Falha ao refinar prompt com Gemini");
   }
 }

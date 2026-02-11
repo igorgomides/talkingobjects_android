@@ -22,13 +22,26 @@ export default function PreviewSection({ imageUrl, videoUrl, isGenerating }: Pre
     return (
         <div className="space-y-4">
             {imageUrl && !videoUrl && (
-                <div className="relative aspect-[9/16] w-full max-w-[300px] mx-auto rounded-lg overflow-hidden border-2 border-purple-500 shadow-lg shadow-purple-500/20">
-                    {/* Using standard img tag for now to avoid domain config issues during proto */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt="Generated Preview" className="object-cover w-full h-full" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                        <p className="text-white font-bold animate-pulse">Gerando Animação...</p>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative aspect-[9/16] w-full max-w-[300px] mx-auto rounded-lg overflow-hidden border-2 border-purple-500 shadow-lg shadow-purple-500/20">
+                        {/* Using standard img tag for now to avoid domain config issues during proto */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imageUrl} alt="Generated Preview" className="object-cover w-full h-full" />
+                        {isGenerating && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                <p className="text-white font-bold animate-pulse">Gerando Animação...</p>
+                            </div>
+                        )}
                     </div>
+                    {!isGenerating && (
+                        <a
+                            href={imageUrl}
+                            download="generated-character.png"
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-bold transition-all text-sm"
+                        >
+                            <Download size={16} /> Baixar Imagem (PNG)
+                        </a>
+                    )}
                 </div>
             )}
 

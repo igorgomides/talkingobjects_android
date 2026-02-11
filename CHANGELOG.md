@@ -2,6 +2,34 @@
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
 
+## [2.0.0] - 2026-02-11
+
+### Major Changes
+- **Full Gemini Migration**: Completely replaced Replicate integration (Image, Audio, Video) with Google's native Generative AI stack.
+    - **Image Generation**: Switched from Replicate/SDXL to **Google Imagen 3.0** (`imagen-3.0-generate-001`).
+    - **Video Generation**: Switched from Replicate/SadTalker to **Google Veo** (`veo-3.1-generate-preview`).
+    - **Script & Prompt**: Continued use of Gemini 1.5/2.0 for text logic.
+- **Architecture**:
+    - Implemented `gemini-image.ts` and `gemini-video.ts` server actions.
+    - Refactored `FormData` submission to bypass Next.js Server Action serialization limits ("Maximum array nesting").
+
+### Fixed
+- **Video Playback**: Fixed 403 Forbidden error on Veo video links by automatically appending the API Key to the URL.
+- **API Quotas**: Mitigated Veo 2.0 `429 Resource Exhausted` errors by switching to the `veo-3.1-generate-preview` model.
+- **Payload Handling**: Fixed `INVALID_ARGUMENT` errors in Veo API by implementing the correct `mimeType` and `bytesBase64Encoded` structure.
+
+### Added
+- **Image Download**: Added a "Download Image" button in the preview section to save the generated character before video creation.
+
+## [1.1.1] - 2026-02-09
+
+### Fixed
+- **Video Animation**: Reverted SadTalker model to `cjwbw/sadtalker` (Hash: `a519cc...`) after `lucataco` version started failing with internal errors.
+- **Image Prompts**:
+    - Fixed an issue where the image generation prompt was not updating due to server-side caching.
+    - Improved prompt composition to strictly enforce a "Medium Shot" on a "Wooden Restaurant Table" with a "Blurred Family Background" for better context.
+    - Renamed server action to `refinePromptV2` to ensure fresh logic deployment.
+
 ## [1.1.0] - 2026-02-09
 
 ### Added

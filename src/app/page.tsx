@@ -6,8 +6,9 @@ import CreationForm from '@/components/CreationForm';
 import PreviewSection from '@/components/PreviewSection';
 import ViralMode from '@/components/ViralMode';
 import { Sparkles, AlertCircle } from 'lucide-react';
-import { generateScript, refinePrompt } from '@/app/actions/gemini';
-import { generateImage, generateAudio, startVideoGeneration, checkPredictionStatus } from '@/app/actions/replicate';
+import { generateScript, refinePromptV2 } from '@/app/actions/gemini';
+import { generateImageWithImagen } from '@/app/actions/gemini-image';
+import { generateVideoWithVeo } from '@/app/actions/gemini-video';
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -65,12 +66,8 @@ export default function Home() {
     setIsGeneratingScript(true);
     try {
       // Pass the selected model and language
-      const result = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
-      if (result.success && result.script) {
-        setFormData(prev => ({ ...prev, script: result.script! }));
-      } else {
-        setError(result.error || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
-      }
+      const script = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
+      setFormData(prev => ({ ...prev, script }));
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
@@ -87,13 +84,10 @@ export default function Home() {
     setError(null);
     setIsRefiningPrompt(true);
     try {
-      // Pass the selected model
-      const result = await refinePrompt(formData.objectName, formData.emotion, formData.reason, geminiModel);
-      if (result.success && result.prompt) {
-        setFormData(prev => ({ ...prev, prompt: result.prompt! }));
-      } else {
-        setError(result.error || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
-      }
+      // Pass the selected model (prompt is always English so language param might be redundant for prompt, but kept for consistency if needed)
+      // Actually prompt generation logic in gemini.ts is English focused, but we might want to pass 'en' to ensure it stays English.
+      const prompt = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel);
+      setFormData(prev => ({ ...prev, prompt }));
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
@@ -119,65 +113,27 @@ export default function Home() {
     setGeneratedVideo(undefined);
 
     try {
-      // 1. Image Generation
+      // 1. Use the approved prompt
       const imagePrompt = formData.prompt;
-      setStatusMessage(language === 'pt' ? "Gerando imagem 3D..." : "Generating 3D image...");
+      console.log("Approved Prompt:", imagePrompt);
 
-      // Check if we already have an image (optional optimization, but let's regenerate to be safe or use state if logic permitted)
-      // For now, simpler to regenerate or we could skip if generatedImage is already set and matches prompt.
-      // Let's regenerate to ensure freshness.
-      const imageResult = await generateImage(imagePrompt);
-      if (!imageResult.success || !imageResult.imageUrl) throw new Error(imageResult.error || "Falha na imagem");
-
-      const imageUrl = imageResult.imageUrl;
+      // 2. Generate Image (Imagen 4.0)
+      setStatusMessage(language === 'pt' ? "Gerando imagem com Imagen 4.0..." : "Generating image with Imagen 4.0...");
+      const imageUrl = await generateImageWithImagen(imagePrompt);
       setGeneratedImage(imageUrl);
 
-      // 2. Audio Generation
-      setStatusMessage(language === 'pt' ? "Gerando áudio (TTS)..." : "Generating audio (TTS)...");
-      // Need to import generateAudio from replicate.ts first!
-      // I will update the import statement separately or trust global replacement if I do it right.
-      // Actually, I need to update the imports in this file too.
-      // For now, assume import is updated.
-      const audioResult = await generateAudio(formData.script);
-      if (!audioResult.success || !audioResult.audioUrl) throw new Error(audioResult.error || "Falha no áudio");
+      // 3. Animate Video (Veo 2.0)
+      setStatusMessage(language === 'pt' ? "Animando vídeo com Veo 2.0 (pode demorar um pouco)..." : "Animating video with Veo 2.0 (may take a while)...");
 
-      const audioUrl = audioResult.audioUrl;
+      // Use FormData to send large base64 string safely
+      const videoFormData = new FormData();
+      videoFormData.append('image', imageUrl);
+      videoFormData.append('script', formData.script);
 
-      // 3. Start Video Generation
-      setStatusMessage(language === 'pt' ? "Iniciando vídeo (SadTalker)..." : "Starting video generation...");
-      const videoInit = await startVideoGeneration(imageUrl, audioUrl);
-      if (!videoInit.success || !videoInit.predictionId) throw new Error(videoInit.error || "Falha ao iniciar vídeo");
+      const videoUrl = await generateVideoWithVeo(videoFormData);
 
-      const predictionId = videoInit.predictionId;
-
-      // 4. Polling Loop
-      let isProcessing = true;
-      while (isProcessing) {
-        // Wait 4 seconds
-        await new Promise(resolve => setTimeout(resolve, 4000));
-
-        setStatusMessage(language === 'pt' ? "Processando vídeo... (Isso pode levar alguns minutos)" : "Processing video... (This make take a few minutes)");
-
-        const statusResult = await checkPredictionStatus(predictionId);
-
-        if (!statusResult.success) {
-          throw new Error(statusResult.error || "Erro ao verificar status");
-        }
-
-        if (statusResult.status === 'succeeded') {
-          isProcessing = false;
-          const videoOutput = statusResult.output;
-          const videoUrl = typeof videoOutput === 'string' ? videoOutput : (Array.isArray(videoOutput) ? videoOutput[0] : (videoOutput as any)?.video || videoOutput);
-          setGeneratedVideo(videoUrl);
-          setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
-        } else if (statusResult.status === 'failed' || statusResult.status === 'canceled') {
-          isProcessing = false;
-          throw new Error(statusResult.error || "Geração de vídeo falhou");
-        } else {
-          // Still processing
-          console.log("Still processing video...");
-        }
-      }
+      setGeneratedVideo(videoUrl);
+      setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
 
     } catch (e: any) {
       console.error(e);
@@ -259,7 +215,7 @@ export default function Home() {
       </main>
 
       <footer className="mt-16 text-center text-gray-500 text-sm">
-        Powered by Google Gemini Pro & Replicate
+        Powered by Google Gemini (Script + Imagen 3 + Veo)
       </footer>
     </div>
   );
