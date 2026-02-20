@@ -195,8 +195,16 @@ export default function Header({ user: initialUser }: HeaderProps) {
     }
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut()
-        window.location.href = '/login'
+        try {
+            // First, sign out from client
+            await supabase.auth.signOut();
+            // Then, call our server-side signout to clear cookies definitely
+            await fetch('/auth/signout', { method: 'POST' });
+        } catch (e) {
+            console.error("Sign out error:", e);
+        } finally {
+            window.location.href = '/login';
+        }
     }
 
     useEffect(() => {
