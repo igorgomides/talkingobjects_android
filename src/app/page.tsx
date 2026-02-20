@@ -1,41 +1,65 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CreationForm from '@/components/CreationForm';
 import PreviewSection from '@/components/PreviewSection';
+import VideoPromptApproval from '@/components/VideoPromptApproval';
 import ViralMode from '@/components/ViralMode';
-import { Sparkles, AlertCircle } from 'lucide-react';
+import { Sparkles, AlertCircle, Image as ImageIcon, Video } from 'lucide-react';
 import { generateScript, refinePromptV2 } from '@/app/actions/gemini';
 import { generateImageWithImagen } from '@/app/actions/gemini-image';
 import { generateVideoWithVeo } from '@/app/actions/gemini-video';
 
+type Step = 'input' | 'approval' | 'result';
+
 export default function Home() {
+  const [step, setStep] = useState<Step>('input');
+
   const [formData, setFormData] = useState({
     objectName: '',
-    emotion: 'Com muita Raiva', // Default will be updated by effect based on lang
+    emotion: 'Com muita Raiva',
     reason: '',
     script: '',
     prompt: ''
   });
 
+  // New v2.0 States
+  const [voiceStyle, setVoiceStyle] = useState("Cartoon / Expressive");
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+
   // Language State (Default: English)
   const [language, setLanguage] = useState<'en' | 'pt'>('en');
+
+  useEffect(() => {
+    // Initial load
+    const saved = localStorage.getItem('language') as 'en' | 'pt';
+    if (saved) setLanguage(saved);
+
+    // Listen for changes from Header
+    const handleLangChange = () => {
+      const updated = localStorage.getItem('language') as 'en' | 'pt';
+      if (updated) setLanguage(updated);
+    };
+    window.addEventListener('language-change', handleLangChange);
+    return () => window.removeEventListener('language-change', handleLangChange);
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
   const [isRefiningPrompt, setIsRefiningPrompt] = useState(false);
+
   const [generatedImage, setGeneratedImage] = useState<string | undefined>(undefined);
   const [generatedVideo, setGeneratedVideo] = useState<string | undefined>(undefined);
   const [statusMessage, setStatusMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // New state for Gemini Model selection
+  // Gemini Model selection
   const [geminiModel, setGeminiModel] = useState("gemini-2.5-flash");
-
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'pt' : 'en');
-  };
+  // Veo Model selection (Default: Fast)
+  const [veoModel, setVeoModel] = useState("veo-3.1-fast-generate-preview");
+  // Video Quality selection (Default: Fast - 10cr)
+  const [videoQuality, setVideoQuality] = useState<'fast' | 'quality'>('fast');
 
   const handleViralMode = () => {
     if (language === 'pt') {
@@ -65,7 +89,6 @@ export default function Home() {
     setError(null);
     setIsGeneratingScript(true);
     try {
-      // Pass the selected model and language
       const script = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
       setFormData(prev => ({ ...prev, script }));
     } catch (e: any) {
@@ -76,7 +99,7 @@ export default function Home() {
     }
   };
 
-  const handleRefinePrompt = async () => {
+  const handleRefinePrompt = async (scenarioContext: string) => {
     if (!formData.objectName || !formData.emotion || !formData.reason) {
       setError(language === 'pt' ? "Preencha Objeto, Emoção e Motivo primeiro." : "Please fill in Object, Emotion, and Reason first.");
       return;
@@ -84,9 +107,7 @@ export default function Home() {
     setError(null);
     setIsRefiningPrompt(true);
     try {
-      // Pass the selected model (prompt is always English so language param might be redundant for prompt, but kept for consistency if needed)
-      // Actually prompt generation logic in gemini.ts is English focused, but we might want to pass 'en' to ensure it stays English.
-      const prompt = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel);
+      const prompt = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel, scenarioContext);
       setFormData(prev => ({ ...prev, prompt }));
     } catch (e: any) {
       console.error(e);
@@ -96,96 +117,96 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.script) {
-      setError(language === 'pt' ? "O roteiro é obrigatório." : "Script is required.");
-      return;
-    }
-    if (!formData.prompt) {
-      setError(language === 'pt' ? "Por favor, gere e aprove o prompt da imagem antes de continuar." : "Please generate and approve the image prompt before continuing.");
-      return;
-    }
-
-    setIsLoading(true);
+  // Step 1 Submit: Generate or Use Image -> Move to Approval
+  const handleInitialSubmit = async (e?: React.FormEvent, uploadedImg?: string, scenarioPrompt?: string) => {
+    if (e) e.preventDefault();
     setError(null);
-    setGeneratedImage(undefined);
-    setGeneratedVideo(undefined);
+    setIsLoading(true);
 
     try {
-      // 1. Use the approved prompt
-      const imagePrompt = formData.prompt;
-      console.log("Approved Prompt:", imagePrompt);
+      let imageUrl = uploadedImg;
 
-      // 2. Generate Image (Imagen 4.0)
-      setStatusMessage(language === 'pt' ? "Gerando imagem com Imagen 4.0..." : "Generating image with Imagen 4.0...");
-      const imageUrl = await generateImageWithImagen(imagePrompt);
+      if (!imageUrl) {
+        // Generate Image if not uploaded
+        if (!formData.prompt) {
+          setError(language === 'pt' ? "Gere o prompt antes." : "Generate prompt first.");
+          setIsLoading(false);
+          return;
+        }
+        setStatusMessage(language === 'pt' ? "Gerando imagem com Imagen 4.0..." : "Generating image with Imagen 4.0...");
+        // Pass scenarioPrompt to generation function
+        imageUrl = await generateImageWithImagen(formData.prompt, scenarioPrompt);
+
+        // Refresh Credits (1 Credit spent)
+        window.dispatchEvent(new Event('credits-updated'));
+      }
+
       setGeneratedImage(imageUrl);
-
-      // 3. Animate Video (Veo 2.0)
-      setStatusMessage(language === 'pt' ? "Animando vídeo com Veo 2.0 (pode demorar um pouco)..." : "Animating video with Veo 2.0 (may take a while)...");
-
-      // Use FormData to send large base64 string safely
-      const videoFormData = new FormData();
-      videoFormData.append('image', imageUrl);
-      videoFormData.append('script', formData.script);
-
-      const videoUrl = await generateVideoWithVeo(videoFormData);
-
-      setGeneratedVideo(videoUrl);
-      setStatusMessage(language === 'pt' ? "Pronto!" : "Done!");
-
+      setStep('approval'); // Move to Step 2
     } catch (e: any) {
       console.error(e);
-      setError(e.message || (language === 'pt' ? "Erro durante o processo." : "Error during the process."));
+      setError(e.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Step 2 Submit: Approve Video Prompt -> Generate Video -> Move to Result
+  const handleFinalVideoGeneration = async (finalPrompt: string, finalImage: string) => {
+    setIsLoading(true);
+    setError(null);
+    setStatusMessage(language === 'pt' ? `Animando com ${veoModel}...` : `Animating with ${veoModel}...`);
+
+    try {
+      const videoFormData = new FormData();
+      videoFormData.append('image', finalImage); // This is the composited image (with logo)
+      videoFormData.append('prompt', finalPrompt); // This is the user-approved prompt
+      videoFormData.append('model', veoModel); // Pass selected model
+      videoFormData.append('quality', videoQuality); // Pass quality (fast/quality)
+
+      const videoUrl = await generateVideoWithVeo(videoFormData);
+
+      // Refresh Credits (10 Credits spent)
+      window.dispatchEvent(new Event('credits-updated'));
+
+      setGeneratedVideo(videoUrl);
+      setStep('result'); // Move to Step 3
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetProcess = () => {
+    setStep('input');
+    setGeneratedVideo(undefined);
+    setGeneratedImage(undefined);
+  };
+
   return (
-    <div className="min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="max-w-4xl mx-auto flex flex-col items-center gap-8">
-
-        <header className="text-center space-y-2 relative w-full flex flex-col items-center">
-          {/* Language Toggle */}
-          <button
-            onClick={toggleLanguage}
-            className="absolute top-0 right-0 p-2 bg-gray-800 rounded-full border border-gray-600 hover:border-white transition-colors flex items-center gap-2 text-xs font-bold text-white"
-          >
-            <span>{language === 'en' ? '🇺🇸 EN' : '🇧🇷 PT'}</span>
-          </button>
-
-          <div className="inline-flex items-center justify-center p-3 bg-purple-900/50 rounded-full mb-4 ring-1 ring-purple-500">
-            <Sparkles className="text-purple-300 mr-2" />
-            <span className="text-purple-200 font-bold tracking-wider text-sm">GEMINI EDITION</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-lg">
-            Talking Objects
-          </h1>
-          <p className="text-gray-300 text-lg">
-            {language === 'pt' ? "Crie vídeos virais para Reels com IA 🤖✨" : "Create viral AI videos for Reels 🤖✨"}
-          </p>
-        </header>
-
-        <ViralMode onActivate={handleViralMode} language={language} />
+    <div className="min-h-screen px-4 pb-20 pt-4 font-[family-name:var(--font-geist-sans)]">
+      <main className="max-w-md mx-auto flex flex-col items-center gap-6">
 
         {error && (
-          <div className="w-full bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg flex items-center gap-2 animate-bounce">
+          <div className="w-full bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg flex items-center gap-2 animate-bounce text-sm">
             <AlertCircle size={20} />
             {error}
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8 w-full">
-          <div className="flex flex-col gap-4 order-2 md:order-1">
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-              1. {language === 'pt' ? "Configuração" : "Configuration"} 🛠️
-            </h2>
+        <div className="w-full flex flex-col gap-6">
+          {/* FORM SECTION - Always Visible initially */}
+          <div className={`w-full transition-all duration-300 ${generatedImage || generatedVideo ? 'hidden' : 'block'}`}>
             <CreationForm
               formData={formData}
               setFormData={setFormData}
-              onSubmit={handleSubmit}
+              voiceStyle={voiceStyle}
+              setVoiceStyle={setVoiceStyle}
+              logoImage={logoImage}
+              setLogoImage={setLogoImage}
+              onSubmit={handleInitialSubmit}
               onGenerateScript={handleGenerateScript}
               onRefinePrompt={handleRefinePrompt}
               isGeneratingScript={isGeneratingScript}
@@ -193,30 +214,68 @@ export default function Home() {
               isLoading={isLoading}
               geminiModel={geminiModel}
               setGeminiModel={setGeminiModel}
+              veoModel={veoModel}
+              setVeoModel={setVeoModel}
               language={language}
             />
           </div>
 
-          <div className="flex flex-col gap-4 order-1 md:order-2">
-            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-              2. {language === 'pt' ? "Resultado" : "Result"} 🎬
-            </h2>
-            <div className="sticky top-8 space-y-2">
-              {isLoading && <p className="text-purple-400 text-center animate-pulse">{statusMessage}</p>}
+          {/* APPROVAL / PREVIEW SECTION - Only Visible when content exists */}
+          {(generatedImage || generatedVideo) && (
+            <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Back Button to Form */}
+              {!generatedVideo && step === 'approval' && (
+                <button
+                  onClick={() => { setGeneratedImage(undefined); setStep('input'); }}
+                  className="text-gray-400 hover:text-white text-sm flex items-center gap-1 mb-2"
+                >
+                  ← {language === 'pt' ? 'Voltar para Edição' : 'Back to Edit'}
+                </button>
+              )}
+
+              {step === 'approval' && generatedImage && (
+                <VideoPromptApproval
+                  imageUrl={generatedImage}
+                  logoUrl={logoImage || undefined}
+                  script={formData.script}
+                  voiceStyle={voiceStyle}
+                  language={language}
+                  isLoading={isLoading}
+                  onApprove={handleFinalVideoGeneration}
+                  onCancel={() => { setGeneratedImage(undefined); setStep('input'); }}
+                  videoQuality={videoQuality}
+                  setVideoQuality={setVideoQuality}
+                />
+              )}
+
               <PreviewSection
                 imageUrl={generatedImage}
                 videoUrl={generatedVideo}
                 isGenerating={isLoading}
+                language={language}
               />
+
+              {step === 'result' && (
+                <div className="bg-gray-900 p-6 rounded-lg text-center border border-gray-700">
+                  <h3 className="text-xl text-white font-bold mb-4">
+                    {language === 'pt' ? 'Vídeo Pronto!' : 'Video Ready!'}
+                  </h3>
+                  <button
+                    onClick={resetProcess}
+                    className="w-full bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-md transition-colors font-bold"
+                  >
+                    {language === 'pt' ? 'Criar Novo' : 'Create New'}
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
       </main>
 
-      <footer className="mt-16 text-center text-gray-500 text-sm">
-        Powered by Google Gemini (Script + Imagen 3 + Veo)
-      </footer>
+      {/* Footer can be hidden or very subtle */}
     </div>
   );
 }

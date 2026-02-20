@@ -1,15 +1,59 @@
-# AI Speaking Object (Gemini Edition) 🤖🎤
+# Talking Objects (Gemini Edition) 🤖🎤
 
 A Next.js application designed to create viral "Talking Objects" videos for Instagram Reels and TikTok. It leverages the power of Google's **Gemini** for scriptwriting, **Imagen** for high-quality 3D image generation, and **Veo** for video animation.
 
-## ✨ Features
+## ✨ Features (v3.8 SaaS Edition)
 
--   **Bilingual Support**: Switch instantly between English (Default) and Portuguese.
--   **AI Script Writer**: Generates funny, first-person scripts using **Gemini 2.5**.
--   **3D Character Generator**: Creates Pixar-style 3D characters using **Google Imagen 3.0**.
--   **Video Animation**: Animates the character's face and movement using **Google Veo 3.1**.
--   **"Viral Mode"**: A one-click preset to generate a viral concept (Coxinha/Brazilian Snack).
--   **Cyberpunk UI**: A modern, dark-mode interface built with Tailwind CSS.
+-   **📱 Mobile-First Design**:
+    -   **Responsive UI**: Optimized for mobile devices with touch-friendly inputs.
+    -   **App-Like Experience**: Native status bar integration, safe area handling, and smooth transitions.
+    -   **Wizard Flow**: Step-by-step creation process (Script -> Image -> Video) for simplicity.
+    -   **Hamburger Menu**: Clean navigation with slide-out drawer for user settings.
+
+-   **🤖 Complete AI Pipeline**:
+    -   **Script**: Gemini 2.0 Flash (Bilingual EN/PT).
+    -   **Image**: Google Imagen 3.0 (High-fidelity 3D characters).
+    -   **Video**: Google Veo 3.1 (State-of-the-art animation).
+    -   **Dynamic Scenarios**: Choose from 5+ environments (Green Screen, Neon Studio, etc.) or create custom backgrounds.
+
+-   **🔐 Enterprise-Grade Auth**:
+    -   Secure Email/Password via Supabase Auth.
+    -   **Invite-only Whitelist** system for Beta access control.
+    -   Professional Flow: Sign Up, Forgot Password, Reset Password.
+
+-   **💳 Monetization & Credits**:
+    -   **Stripe Integration** for credit purchases.
+    -   Real-time credit balance tracking.
+    -   Tiered usage costs:
+        -   **Script**: Free (0 credits).
+        -   **Image**: 1 Credit.
+        -   **Video**: 
+            -   **Fast (Veo 3.1 Fast)**: 15 Credits (~6s).
+            -   **High Quality (Veo 3.1)**: 40 Credits (~6s).
+    -   **Available Packages**:
+        -   **Starter**: 35 Credits (R$ 29).
+        -   **Creator**: 130 Credits (R$ 99).
+        -   **Agency**: 450 Credits (R$ 299).
+
+-   **📊 Admin Dashboard**:
+    -   Dedicated `/admin` route for super-users.
+    -   **Live Analytics**: Track total generations, error rates, and credit burn.
+    -   **Financials**: Monitor **Revenue**, **Costs**, **Profit**, and **Outstanding Liability**.
+    -   **Usage Logs**: Detailed audit trail with **User Email**, **Asset Links**, and **Date Range Filtering**.
+    -   **User Management**:
+        -   **Whitelist Control**: Add/Remove users.
+        -   **Credit Adjustments**: Manually grant or revoke credits.
+
+-   **☁️ Cloud Features**:
+    -   **Favorites**: Save/Load scripts from the cloud.
+    -   **History**: Track video generation history.
+
+## 🛠️ Tech Stack
+
+-   **Frontend**: Next.js 15 (App Router), Tailwind CSS, Lucide React
+-   **Backend**: Supabase (PostgreSQL, Auth, Realtime, Edge Functions)
+-   **AI**: Google Gemini/Imagen/Veo APIs
+-   **Payments**: Stripe Connect
 
 ## 🚀 Getting Started
 
@@ -25,17 +69,31 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
     ```
 
 3.  **Configure Environment Variables**:
-    Create a `.env.local` file in the `webapp` directory and add your Google API key:
+    Create a `.env.local` file in the `webapp` directory and add your keys:
     ```bash
     NEXT_PUBLIC_GEMINI_API_KEY=your_google_gemini_key_here
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    STRIPE_SECRET_KEY=your_stripe_secret
+    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role
     ```
 
-4.  **Run the development server**:
+4.  **Database Setup (Supabase)**:
+    -   Go to the Supabase SQL Editor.
+    -   Run the scripts in `supabase/` folder in this order:
+        1.  `schema.sql` (Core tables)
+        2.  `usage_logs_v3.2.sql` (Logging)
+        3.  `storage.sql` (Asset Bucket)
+        4.  `transactions.sql` (Credit Sales)
+        5.  `rpc_increment.sql` (Atomic Credit Updates)
+
+5.  **Run the development server**:
     ```bash
     npm run dev
     ```
 
-5.  Open [http://localhost:3000](http://localhost:3000) in your browser.
+6.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📝 Usage
 

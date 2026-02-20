@@ -1,0 +1,13 @@
+{
+  "name": "models/veo-3.1-fast-generate-preview/operations/vuaqxazmw4cd",
+  "done": true,
+  "response": {
+    "@type": "type.googleapis.com/google.ai.generativelanguage.v1beta.PredictLongRunningResponse",
+    "generateVideoResponse": {
+      "raiMediaFilteredCount": 1,
+      "raiMediaFilteredReasons": [
+        "Sorry, we can't create videos from input images containing photorealistic children. Please remove the reference and try again."
+      ]
+    }
+  }
+}
