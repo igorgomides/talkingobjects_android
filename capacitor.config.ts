@@ -2,10 +2,10 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.aispeakingobject.app',
-  appName: 'AI Speaking Object',
+  appName: 'Talking Objects',
   webDir: 'public',
   server: {
-    url: 'https://4b25-76-68-130-59.ngrok-free.app',
+    url: 'https://talkingobjectsandroid.vercel.app',
     cleartext: true
   },
   plugins: {
