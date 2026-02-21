@@ -9,7 +9,7 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
     -   **App-Like Experience**: Native status bar integration, safe area handling, and smooth transitions.
     -   **Wizard Flow**: Step-by-step creation process (Script -> Image -> Video) for simplicity.
     -   **Hamburger Menu**: Clean navigation with slide-out drawer for user settings.
-    -   **Interactive Tutorial**: Beautiful animated `/tutorial` page explaining all features, fully localized in EN/PT.
+    -   **Interactive Tutorial**: Beautiful animated `/tutorial` page explaining all features, fully localized in EN/PT, featuring real mobile-optimized app screenshots.
 
 -   **🤖 Complete AI Pipeline**:
     -   **Script**: Gemini 2.0 Flash (Bilingual EN/PT).

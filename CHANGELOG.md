@@ -8,6 +8,7 @@ All notable changes to the "AI Speaking Object" project will be documented in th
     - Created a new `/tutorial` route featuring a comprehensive, animated step-by-step guide on how to use the application.
     - Added full i18n support (English and Portuguese) to the tutorial.
     - Documented all core workflows: AI Script Generation, AI Image Generation, Personal Photo Upload, Video Animation (Fast & High Quality), and Downloading.
+    - Replaced placeholder images with real, mobile-optimized app screenshots cropped to focus perfectly on the UI forms.
     - Integrated a direct link to the Tutorial in the mobile/responsive Hamburger Header Menu.
 
 ## [3.10.0] - 2026-02-20
