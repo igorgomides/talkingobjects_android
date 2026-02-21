@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #e2e8f0;
+      background-color: #000000;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .logo-circle {
+      width: 60px;
+      height: 60px;
+      background: #000;
+      border-radius: 12px;
+      margin: 0 auto 15px;
+      line-height: 60px;
+      font-size: 30px;
+    }
+    .content {
+      padding: 40px 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #ffffff;
+      margin-top: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 16px;
+    }
+    .button-container {
+      margin: 35px 0;
+    }
+    .button {
+      background-color: #2563eb;
+      color: #ffffff !important;
+      padding: 16px 32px;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+    .footer {
+      padding: 20px;
+      text-align: center;
+      background-color: #020617;
+      color: #64748b;
+      font-size: 12px;
+    }
+    .footer a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo-circle">🤖</div>
+      <div style="font-size: 20px; font-weight: bold; color: white; letter-spacing: -1px;">Talking Objects</div>
+    </div>
+    <div class="content">
+      <h1>Welcome to the Future of Content!</h1>
+      <p>Thanks for joining the <b>Talking Objects</b> beta. To start creating amazing videos, please confirm your email address by clicking the button below:</p>
+      
+      <div class="button-container">
+        <a href="{{ .ConfirmationURL }}" class="button">Confirm My Email</a>
+      </div>
+      
+      <p style="font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2026 Talking Objects. All rights reserved.</p>
+      <p>Follow us on <a href="https://instagram.com">Instagram</a></p>
+    </div>
+  </div>
+</body>
+</html>

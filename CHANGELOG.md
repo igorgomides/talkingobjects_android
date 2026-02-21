@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [3.9.0] - 2026-02-20
+
+### Major Changes
+- **Production Launch (Vercel)**:
+    - Successfully deployed the web application to Vercel production environment.
+    - Configured production-ready Environment Variables via Bulk Import.
+    - Updated **Supabase Auth** with production redirect URLs.
+    - Configured **Stripe Webhooks** with a dedicated production endpoint and secured signing secret.
+- **URL Standardization**:
+    - Centralized `NEXT_PUBLIC_SITE_URL` to point to the production Vercel domain.
+
 ## [3.8.1] - 2026-02-19
 
 ### Added

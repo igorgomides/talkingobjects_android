@@ -29,15 +29,21 @@ export async function signup(formData: FormData) {
     const password = formData.get('password') as string
     const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-    // 1. Whitelist Check
-    const { data: whitelistEntry } = await supabase
+    // 1. Whitelist Check (Beta OR Lead)
+    const { data: betaEntry } = await supabase
         .from('whitelist')
         .select('email')
         .eq('email', email)
         .single();
 
-    if (!whitelistEntry) {
-        redirect('/error?message=' + encodeURIComponent("This email is not on the Beta Whitelist."))
+    const { data: leadEntry } = await supabase
+        .from('whitelist_lead')
+        .select('email')
+        .eq('email', email)
+        .single();
+
+    if (!betaEntry && !leadEntry) {
+        redirect('/error?message=' + encodeURIComponent("This email is not on any Whitelist. Request access first."))
     }
 
     // 2. Sign Up
