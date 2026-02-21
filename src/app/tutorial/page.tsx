@@ -117,28 +117,33 @@ export default function TutorialPage() {
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                         <MessageSquare size={120} className="text-blue-500 rotate-12" />
                     </div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                                <span className="font-bold text-2xl text-blue-400">1</span>
+                    <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                                    <span className="font-bold text-2xl text-blue-400">1</span>
+                                </div>
+                                <h2 className="text-3xl font-bold">{text.step1}</h2>
                             </div>
-                            <h2 className="text-3xl font-bold">{text.step1}</h2>
+                            <p className="text-xl text-gray-300 mb-6">{text.step1Desc}</p>
+                            <ul className="space-y-4 text-gray-400">
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
+                                    <span>{text.step1P1}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
+                                    <span>{text.step1P2}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
+                                    <span>{text.step1P3}</span>
+                                </li>
+                            </ul>
                         </div>
-                        <p className="text-xl text-gray-300 mb-6">{text.step1Desc}</p>
-                        <ul className="space-y-4 text-gray-400">
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
-                                <span>{text.step1P1}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
-                                <span>{text.step1P2}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] shrink-0" />
-                                <span>{text.step1P3}</span>
-                            </li>
-                        </ul>
+                        <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(59,130,246,0.2)] border border-blue-500/20">
+                            <img src="/tutorial/step1.png" alt="Tutorial Step 1" className="w-full h-auto object-cover" />
+                        </div>
                     </div>
                 </div>
 
@@ -149,33 +154,38 @@ export default function TutorialPage() {
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                         <ImageIcon size={120} className="text-purple-500 -rotate-6" />
                     </div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
-                                <span className="font-bold text-2xl text-purple-400">2</span>
+                    <div className="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+                                    <span className="font-bold text-2xl text-purple-400">2</span>
+                                </div>
+                                <h2 className="text-3xl font-bold">{text.step2}</h2>
                             </div>
-                            <h2 className="text-3xl font-bold">{text.step2}</h2>
-                        </div>
-                        <p className="text-xl text-gray-300 mb-8">{text.step2Desc}</p>
+                            <p className="text-xl text-gray-300 mb-8">{text.step2Desc}</p>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {/* Option A */}
-                            <div className="bg-black/50 border border-purple-500/20 rounded-2xl p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Sparkles className="text-purple-400" size={24} />
-                                    <h3 className="font-bold text-lg">{text.step2Opt1Title}</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {/* Option A */}
+                                <div className="bg-black/50 border border-purple-500/20 rounded-2xl p-6">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <Sparkles className="text-purple-400" size={24} />
+                                        <h3 className="font-bold text-lg">{text.step2Opt1Title}</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">{text.step2Opt1Desc}</p>
                                 </div>
-                                <p className="text-sm text-gray-400 leading-relaxed">{text.step2Opt1Desc}</p>
-                            </div>
-                            {/* Option B */}
-                            <div className="bg-black/50 border border-pink-500/20 rounded-2xl p-6 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-pink-500/5 pointer-events-none" />
-                                <div className="flex items-center gap-3 mb-3 relative z-10">
-                                    <Upload className="text-pink-400" size={24} />
-                                    <h3 className="font-bold text-lg">{text.step2Opt2Title}</h3>
+                                {/* Option B */}
+                                <div className="bg-black/50 border border-pink-500/20 rounded-2xl p-6 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-pink-500/5 pointer-events-none" />
+                                    <div className="flex items-center gap-3 mb-3 relative z-10">
+                                        <Upload className="text-pink-400" size={24} />
+                                        <h3 className="font-bold text-lg">{text.step2Opt2Title}</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-400 leading-relaxed relative z-10">{text.step2Opt2Desc}</p>
                                 </div>
-                                <p className="text-sm text-gray-400 leading-relaxed relative z-10">{text.step2Opt2Desc}</p>
                             </div>
+                        </div>
+                        <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.2)] border border-purple-500/20">
+                            <img src="/tutorial/step2.png" alt="Tutorial Step 2" className="w-full h-auto object-cover" />
                         </div>
                     </div>
                 </div>
@@ -187,28 +197,33 @@ export default function TutorialPage() {
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                         <PlayCircle size={120} className="text-pink-500 rotate-12" />
                     </div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-pink-500/20 flex items-center justify-center border border-pink-500/30">
-                                <span className="font-bold text-2xl text-pink-400">3</span>
+                    <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-pink-500/20 flex items-center justify-center border border-pink-500/30">
+                                    <span className="font-bold text-2xl text-pink-400">3</span>
+                                </div>
+                                <h2 className="text-3xl font-bold">{text.step3}</h2>
                             </div>
-                            <h2 className="text-3xl font-bold">{text.step3}</h2>
+                            <p className="text-xl text-gray-300 mb-6">{text.step3Desc}</p>
+                            <ul className="space-y-4 text-gray-400">
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
+                                    <span>{text.step3P1}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
+                                    <span>{text.step3P2}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
+                                    <span>{text.step3P3}</span>
+                                </li>
+                            </ul>
                         </div>
-                        <p className="text-xl text-gray-300 mb-6">{text.step3Desc}</p>
-                        <ul className="space-y-4 text-gray-400">
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
-                                <span>{text.step3P1}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
-                                <span>{text.step3P2}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0" />
-                                <span>{text.step3P3}</span>
-                            </li>
-                        </ul>
+                        <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(236,72,153,0.2)] border border-pink-500/20">
+                            <img src="/tutorial/step3.png" alt="Tutorial Step 3" className="w-full h-auto object-cover" />
+                        </div>
                     </div>
                 </div>
 
@@ -219,28 +234,33 @@ export default function TutorialPage() {
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                         <Download size={120} className="text-green-500 -rotate-12" />
                     </div>
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
-                                <span className="font-bold text-2xl text-green-400">4</span>
+                    <div className="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
+                        <div className="flex-1 w-full">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
+                                    <span className="font-bold text-2xl text-green-400">4</span>
+                                </div>
+                                <h2 className="text-3xl font-bold">{text.step4}</h2>
                             </div>
-                            <h2 className="text-3xl font-bold">{text.step4}</h2>
+                            <p className="text-xl text-gray-300 mb-6">{text.step4Desc}</p>
+                            <ul className="space-y-4 text-gray-400">
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
+                                    <span>{text.step4P1}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
+                                    <span>{text.step4P2}</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
+                                    <span>{text.step4P3}</span>
+                                </li>
+                            </ul>
                         </div>
-                        <p className="text-xl text-gray-300 mb-6">{text.step4Desc}</p>
-                        <ul className="space-y-4 text-gray-400">
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
-                                <span>{text.step4P1}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
-                                <span>{text.step4P2}</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] shrink-0" />
-                                <span>{text.step4P3}</span>
-                            </li>
-                        </ul>
+                        <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.2)] border border-green-500/20">
+                            <img src="/tutorial/step4.png" alt="Tutorial Step 4" className="w-full h-auto object-cover" />
+                        </div>
                     </div>
                 </div>
 
