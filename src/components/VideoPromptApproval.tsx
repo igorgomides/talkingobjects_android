@@ -14,6 +14,8 @@ interface VideoPromptApprovalProps {
     isLoading: boolean;
     videoQuality: 'fast' | 'quality';
     setVideoQuality: (quality: 'fast' | 'quality') => void;
+    videoDuration: 6 | 8;
+    setVideoDuration: (duration: 6 | 8) => void;
 }
 
 export default function VideoPromptApproval({
@@ -26,7 +28,9 @@ export default function VideoPromptApproval({
     onCancel,
     isLoading,
     videoQuality,
-    setVideoQuality
+    setVideoQuality,
+    videoDuration,
+    setVideoDuration
 }: VideoPromptApprovalProps) {
     const [prompt, setPrompt] = useState("");
     const [compositedImage, setCompositedImage] = useState<string>(imageUrl);
@@ -114,23 +118,44 @@ Ensure that the intonation matches the character's emotion.
                     </p>
                 </div>
 
-                {/* Video Quality Selector */}
-                <div className="md:col-span-2 bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                    <label className="block text-sm font-medium text-purple-300 mb-2">
-                        {language === 'pt' ? "Qualidade do Vídeo" : "Video Quality"}
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
-                        <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'fast' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
-                            <input type="radio" name="quality" value="fast" checked={videoQuality === 'fast'} onChange={() => setVideoQuality('fast')} className="hidden" />
-                            <span className="font-bold text-white text-base">{language === 'pt' ? "Rápido (Padrão)" : "Fast (Standard)"}</span>
-                            <span className="text-sm text-green-400 font-mono">15 {language === 'pt' ? "créditos" : "credits"}</span>
+                {/* Video Settings (Quality & Duration) */}
+                <div className="md:col-span-2 space-y-4">
+                    {/* Video Duration Selector */}
+                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                        <label className="block text-sm font-medium text-blue-300 mb-2">
+                            {language === 'pt' ? "Duração do Vídeo" : "Video Duration"}
                         </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoDuration === 6 ? 'bg-blue-900/40 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                                <input type="radio" name="duration" value={6} checked={videoDuration === 6} onChange={() => setVideoDuration(6)} className="hidden" />
+                                <span className="font-bold text-white text-base">6 {language === 'pt' ? "Segundos" : "Seconds"}</span>
+                            </label>
 
-                        <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'quality' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
-                            <input type="radio" name="quality" value="quality" checked={videoQuality === 'quality'} onChange={() => setVideoQuality('quality')} className="hidden" />
-                            <span className="font-bold text-white text-base">{language === 'pt' ? "Alta Qualidade (Pro)" : "High Quality (Pro)"}</span>
-                            <span className="text-sm text-yellow-400 font-mono">40 {language === 'pt' ? "créditos" : "credits"}</span>
+                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoDuration === 8 ? 'bg-blue-900/40 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                                <input type="radio" name="duration" value={8} checked={videoDuration === 8} onChange={() => setVideoDuration(8)} className="hidden" />
+                                <span className="font-bold text-white text-base">8 {language === 'pt' ? "Segundos" : "Seconds"}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Video Quality Selector */}
+                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                        <label className="block text-sm font-medium text-purple-300 mb-2">
+                            {language === 'pt' ? "Qualidade do Vídeo" : "Video Quality"}
                         </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'fast' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                                <input type="radio" name="quality" value="fast" checked={videoQuality === 'fast'} onChange={() => setVideoQuality('fast')} className="hidden" />
+                                <span className="font-bold text-white text-base">{language === 'pt' ? "Rápido (Padrão)" : "Fast (Standard)"}</span>
+                                <span className="text-sm text-green-400 font-mono">{videoDuration === 6 ? 15 : 25} {language === 'pt' ? "créditos" : "credits"}</span>
+                            </label>
+
+                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'quality' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                                <input type="radio" name="quality" value="quality" checked={videoQuality === 'quality'} onChange={() => setVideoQuality('quality')} className="hidden" />
+                                <span className="font-bold text-white text-base">{language === 'pt' ? "Alta Qualidade (Pro)" : "High Quality (Pro)"}</span>
+                                <span className="text-sm text-yellow-400 font-mono">{videoDuration === 6 ? 40 : 60} {language === 'pt' ? "créditos" : "credits"}</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

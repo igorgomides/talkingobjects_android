@@ -32,15 +32,20 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
     const scenarioPrompt = formData.get('scenarioPrompt') as string || "";
     const imageBase64 = formData.get('image') as string; // Expecting base64 string
     const quality = formData.get('quality') as string || 'fast'; // 'fast' | 'quality'
+    const durationStr = formData.get('duration') as string || '6'; // '6' | '8'
+    const duration = parseInt(durationStr, 10);
     const mimeType = "image/png";
 
-    // Determine Logic based on Quality
-    // Veo 3 Fast: ~10 credits. Veo 3 Quality: ~40 credits.
+    // Determine Logic based on Quality & Duration
     const isFast = quality === 'fast';
-    // Updated Costs (Fed 2026): Proportional to 6s duration
-    // Fast: 15 credits
-    // Quality: 40 credits
-    const creditCost = isFast ? 15 : 40;
+
+    // Dynamic Pricing Logic
+    let creditCost = 0;
+    if (isFast && duration === 6) creditCost = 15;
+    else if (isFast && duration === 8) creditCost = 25;
+    else if (!isFast && duration === 6) creditCost = 40;
+    else if (!isFast && duration === 8) creditCost = 60;
+    else creditCost = 15; // Safe fallback
 
     // Manufacturer: Google
     // Model ID: Use 3.1 for generic if available.
@@ -62,7 +67,7 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
         .single();
 
     if (!profile || profile.credits < creditCost) {
-        throw new Error(`Insufficient credits. ${isFast ? 'Fast' : 'Quality'} Video costs ${creditCost} credits. You have ${profile?.credits || 0}.`);
+        throw new Error(`Insufficient credits. ${isFast ? 'Fast' : 'Quality'} Video (${duration}s) costs ${creditCost} credits. You have ${profile?.credits || 0}.`);
     }
 
     if (!apiKey) throw new Error("API Key do Gemini não configurada");
@@ -85,7 +90,7 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
         ],
         parameters: {
             sampleCount: 1,
-            durationSeconds: 6, // Enforce 6s duration
+            durationSeconds: duration, // Enforce requested 6s or 8s duration
             negativePrompt: "bad quality, blurry, distorted, watermark, text"
         }
     };
@@ -208,12 +213,12 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
         throw error;
     } finally {
         // 4. Analytics Logging (Veo)
-        const duration = Date.now() - startTime;
-        const costSeconds = status === 'success' ? 6 : 0;
+        const latencyDuration = Date.now() - startTime;
+        const costSeconds = status === 'success' ? duration : 0;
 
         // Cost Calculation
-        // Fast: ~$0.20/sec (Audio included) -> $1.20
-        // Quality: ~$0.542/sec (Audio included) -> $3.25
+        // Fast: ~$0.20/sec (Audio included)
+        // Quality: ~$0.542/sec (Audio included)
         const unitCost = isFast ? 0.20 : 0.542;
 
         const { error: logError } = await supabase.from('usage_logs').insert({
@@ -222,7 +227,7 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
             model_used: modelId,
             cost_seconds: costSeconds,
             credits_deducted: status === 'success' ? creditCost : 0,
-            latency_ms: duration,
+            latency_ms: latencyDuration,
             status: status,
             error_message: errorMessage,
             provider_cost: status === 'success' ? (costSeconds * unitCost) : 0,

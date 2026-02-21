@@ -60,6 +60,8 @@ export default function Home() {
   const [veoModel, setVeoModel] = useState("veo-3.1-fast-generate-preview");
   // Video Quality selection (Default: Fast - 10cr)
   const [videoQuality, setVideoQuality] = useState<'fast' | 'quality'>('fast');
+  // Video Duration selection (Default: 6s)
+  const [videoDuration, setVideoDuration] = useState<6 | 8>(6);
 
   const handleViralMode = () => {
     if (language === 'pt') {
@@ -163,6 +165,7 @@ export default function Home() {
       videoFormData.append('prompt', finalPrompt); // This is the user-approved prompt
       videoFormData.append('model', veoModel); // Pass selected model
       videoFormData.append('quality', videoQuality); // Pass quality (fast/quality)
+      videoFormData.append('duration', videoDuration.toString()); // Pass duration (6/8)
 
       const videoUrl = await generateVideoWithVeo(videoFormData);
 
@@ -246,6 +249,8 @@ export default function Home() {
                   onCancel={() => { setGeneratedImage(undefined); setStep('input'); }}
                   videoQuality={videoQuality}
                   setVideoQuality={setVideoQuality}
+                  videoDuration={videoDuration}
+                  setVideoDuration={setVideoDuration}
                 />
               )}
 
