@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [3.10.0] - 2026-02-20
+
+### Major Changes
+- **Lead Capture & Invite System**:
+    - Created a new `/invite` landing page to collect leads and offer 20 free initial credits.
+    - Integrated an autoplaying mock video of the "Talking Object" creation within a 3D phone frame to showcase capabilities directly on the invite page.
+    - Added a "Golden Tip" section for users to optimize their credit usage by testing images before generating videos.
+- **Authentication Improvements**:
+    - **Whitelist Lead Support**: Updated the `/signup` flow (`actions.ts`) to verify existence in both the premium `whitelist` and the new `whitelist_lead` tables.
+    - **Credit Assignment**: Ensured users signing up via the lead capture whitelist correctly receive their 20 initial credits via `lead_migration.sql` triggers.
+
 ## [3.9.0] - 2026-02-20
 
 ### Major Changes

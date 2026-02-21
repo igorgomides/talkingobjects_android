@@ -16,9 +16,10 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
     -   **Video**: Google Veo 3.1 (State-of-the-art animation).
     -   **Dynamic Scenarios**: Choose from 5+ environments (Green Screen, Neon Studio, etc.) or create custom backgrounds.
 
--   **🔐 Enterprise-Grade Auth**:
+-   **🔐 Enterprise-Grade Auth & Lead Capture**:
     -   Secure Email/Password via Supabase Auth.
-    -   **Invite-only Whitelist** system for Beta access control.
+    -   **Lead Capture Landing Page** (`/invite`) with integrated video showcase and "Golden Tip" credit strategy.
+    -   **Dual Whitelist System**: Access control supporting both Premium Alpha users and Beta Invite leads.
     -   Professional Flow: Sign Up, Forgot Password, Reset Password.
 
 -   **💳 Monetization & Credits**:
