@@ -341,6 +341,15 @@ export default function Header({ user: initialUser }: HeaderProps) {
                                 <span>{text.user}</span>
                             </Link>
 
+                            <Link
+                                href="/tutorial"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors"
+                            >
+                                <span className="font-bold">📘</span>
+                                <span>Tutorial</span>
+                            </Link>
+
                             {role === 'admin' && (
                                 <Link
                                     href="/admin"
