@@ -142,7 +142,7 @@ export default function TutorialPage() {
                             </ul>
                         </div>
                         <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(59,130,246,0.2)] border border-blue-500/20">
-                            <img src="/tutorial/step1_1771649551498.png" alt="Tutorial Step 1" className="w-full h-auto object-cover" />
+                            <img src="/tutorial/cropped_step1_1771649551498.png" alt="Tutorial Step 1" className="w-full h-auto object-cover" />
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,7 @@ export default function TutorialPage() {
                             </div>
                         </div>
                         <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.2)] border border-purple-500/20">
-                            <img src="/tutorial/step2_1771649753617.png" alt="Tutorial Step 2" className="w-full h-auto object-cover" />
+                            <img src="/tutorial/cropped_step2_1771649753617.png" alt="Tutorial Step 2" className="w-full h-auto object-cover" />
                         </div>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function TutorialPage() {
                             </ul>
                         </div>
                         <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(236,72,153,0.2)] border border-pink-500/20">
-                            <img src="/tutorial/step3_1771649958299.png" alt="Tutorial Step 3" className="w-full h-auto object-cover" />
+                            <img src="/tutorial/cropped_step3_1771649958299.png" alt="Tutorial Step 3" className="w-full h-auto object-cover" />
                         </div>
                     </div>
                 </div>
@@ -259,7 +259,7 @@ export default function TutorialPage() {
                             </ul>
                         </div>
                         <div className="flex-1 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.2)] border border-green-500/20">
-                            <img src="/tutorial/step4_1771650091493.png" alt="Tutorial Step 4" className="w-full h-auto object-cover" />
+                            <img src="/tutorial/cropped_step4_1771650091493.png" alt="Tutorial Step 4" className="w-full h-auto object-cover" />
                         </div>
                     </div>
                 </div>
