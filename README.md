@@ -30,8 +30,8 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
         -   **Script**: Free (0 credits).
         -   **Image**: 1 Credit.
         -   **Video**: 
-            -   **Fast (Veo 3.1 Fast)**: 15 Credits (~6s).
-            -   **High Quality (Veo 3.1)**: 40 Credits (~6s).
+            -   **Fast (Veo 3.1 Fast)**: 15 Credits (6s) | 25 Credits (8s).
+            -   **High Quality (Veo 3.1)**: 40 Credits (6s) | 60 Credits (8s).
     -   **Available Packages**:
         -   **Starter**: 35 Credits (R$ 29).
         -   **Creator**: 130 Credits (R$ 99).

@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [3.12.0] - 2026-02-21
+
+### Added
+- **Dynamic Video Duration & Pricing**:
+    - Users can now select the duration of their generated video (6 or 8 seconds).
+    - Added a dynamic pricing model based on quality and duration tiers:
+        - **Fast**: 15 Credits (6s) or 25 Credits (8s).
+        - **High Quality (Pro)**: 40 Credits (6s) or 60 Credits (8s).
+    - Updated backend API integration to pass the requested duration to Google Veo.
+    - Usage logs now accurately record the generated video duration and the proportional credit cost.
+
 ## [3.11.0] - 2026-02-20
 
 ### Added
