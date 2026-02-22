@@ -4,12 +4,12 @@ import { createClient } from '@/utils/supabase/server';
 
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-export async function generateImageWithImagen(prompt: string, scenarioPrompt: string = ""): Promise<string> {
+export async function generateImageWithImagen(prompt: string, scenarioPrompt: string = ""): Promise<{ success: boolean; url?: string; error?: string }> {
     const supabase = await createClient();
 
     // 1. Auth & Credit Check
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not authenticated");
+    if (!user) return { success: false, error: "User not authenticated" };
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -18,10 +18,10 @@ export async function generateImageWithImagen(prompt: string, scenarioPrompt: st
         .single();
 
     if (!profile || profile.credits < 1) {
-        throw new Error(`Insufficient credits for Image. You need 1 credit.`);
+        return { success: false, error: `Insufficient credits for Image. You need 1 credit.` };
     }
 
-    if (!apiKey) throw new Error("API Key do Gemini não configurada");
+    if (!apiKey) return { success: false, error: "API Key do Gemini não configurada" };
 
     console.log("Generating image with Imagen 4.0...");
 
@@ -64,7 +64,7 @@ export async function generateImageWithImagen(prompt: string, scenarioPrompt: st
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Imagen API Error:", errorText);
-            throw new Error(`Erro na API do Imagen: ${response.statusText} - ${errorText}`);
+            return { success: false, error: `Erro na API do Imagen: ${response.statusText} - ${errorText}` };
         }
 
         const data = await response.json();
@@ -125,10 +125,10 @@ export async function generateImageWithImagen(prompt: string, scenarioPrompt: st
             if (logError) console.error("Failed to log usage:", logError);
 
             // Return Base64 for immediate display (faster)
-            return `data:image/png;base64,${base64Image}`;
+            return { success: true, url: `data:image/png;base64,${base64Image}` };
         } else {
             console.error("Unexpected Imagen response:", data);
-            throw new Error("Formato de resposta do Imagen inválido");
+            return { success: false, error: "Formato de resposta do Imagen inválido" };
         }
 
     } catch (error: any) {
@@ -148,6 +148,6 @@ export async function generateImageWithImagen(prompt: string, scenarioPrompt: st
         });
         if (logError) console.error("Failed to log error usage:", logError);
 
-        throw error;
+        return { success: false, error: error.message };
     }
 }

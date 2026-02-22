@@ -54,11 +54,11 @@ const t = {
         reasonPlaceholder: "Ex: The algorithm dropped the reach",
         scriptLabel: "Script (Speech)",
         scriptPlaceholder: "The exact text that will be spoken...",
-        generateScript: "Generate with AI",
+        generateScript: "Generate Speech",
         generating: "Generating...",
         promptLabel: "Image Prompt (Approval)",
         promptPlaceholder: "Generate the prompt to approve before creating video...",
-        generatePrompt: "Generate Prompt",
+        generatePrompt: "Generate Image Prompt",
         refining: "Refining...",
         voiceLabel: "Voice Style",
         logoLabel: "Brand Logo (Optional)",
@@ -99,11 +99,11 @@ const t = {
         reasonPlaceholder: "Ex: O algoritmo derrubou o alcance",
         scriptLabel: "Roteiro (Fala)",
         scriptPlaceholder: "O texto exato que será falado...",
-        generateScript: "Gerar com IA",
+        generateScript: "Gerar Fala",
         generating: "Gerando...",
         promptLabel: "Prompt da Imagem (Aprovação)",
         promptPlaceholder: "Gere o prompt para aprovar antes de criar o vídeo...",
-        generatePrompt: "Gerar Prompt",
+        generatePrompt: "Gerar Prompt de Imagem",
         refining: "Refinando...",
         voiceLabel: "Estilo da Voz",
         logoLabel: "Logo da Marca (Opcional)",
@@ -392,9 +392,22 @@ export default function CreationForm({
 
                 {/* COMMON: Script */}
                 <div className="relative">
-                    <div className="flex justify-between items-center mb-1">
-                        <label className="block text-sm font-medium text-purple-300">{text.scriptLabel}</label>
-                        <div className="relative">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex flex-col gap-2">
+                            <label className="block text-sm font-medium text-purple-300">{text.scriptLabel}</label>
+                            {activeTab === 'create' && (
+                                <button
+                                    type="button"
+                                    className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 w-fit rounded flex items-center gap-1 disabled:opacity-50"
+                                    onClick={onGenerateScript}
+                                    disabled={isGeneratingScript || !formData.objectName}
+                                >
+                                    {isGeneratingScript ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                                    {isGeneratingScript ? text.generating : text.generateScript}
+                                </button>
+                            )}
+                        </div>
+                        <div className="relative mt-1">
                             <button
                                 type="button"
                                 onClick={() => setShowFavorites(!showFavorites)}
@@ -440,7 +453,7 @@ export default function CreationForm({
                             onChange={handleChange}
                             placeholder={text.scriptPlaceholder}
                             rows={3}
-                            className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-10"
+                            className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2"
 
                         />
                         <button
@@ -451,25 +464,24 @@ export default function CreationForm({
                         >
                             <Star size={16} fill={favorites.includes(formData.script) ? "currentColor" : "none"} />
                         </button>
-
-                        {activeTab === 'create' && (
-                            <button
-                                type="button"
-                                className="absolute bottom-2 right-2 text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded flex items-center gap-1 disabled:opacity-50"
-                                onClick={onGenerateScript}
-                                disabled={isGeneratingScript || !formData.objectName}
-                            >
-                                {isGeneratingScript ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
-                                {isGeneratingScript ? text.generating : text.generateScript}
-                            </button>
-                        )}
                     </div>
                 </div>
 
                 {/* CREATE MODE: Prompt Input */}
                 {activeTab === 'create' && (
                     <div>
-                        <label className="block text-sm font-medium text-purple-300 mb-1">{text.promptLabel}</label>
+                        <div className="flex flex-col gap-2 mb-2">
+                            <label className="block text-sm font-medium text-purple-300">{text.promptLabel}</label>
+                            <button
+                                type="button"
+                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded w-fit flex items-center gap-1 disabled:opacity-50"
+                                onClick={handleRefineClick}
+                                disabled={isRefiningPrompt || !formData.objectName}
+                            >
+                                {isRefiningPrompt ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                {isRefiningPrompt ? text.refining : text.generatePrompt}
+                            </button>
+                        </div>
                         <div className="relative">
                             <textarea
                                 name="prompt"
@@ -477,17 +489,8 @@ export default function CreationForm({
                                 onChange={handleChange}
                                 placeholder={text.promptPlaceholder}
                                 rows={4}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300"
+                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2"
                             />
-                            <button
-                                type="button"
-                                className="absolute bottom-2 right-2 text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1 disabled:opacity-50"
-                                onClick={handleRefineClick}
-                                disabled={isRefiningPrompt || !formData.objectName}
-                            >
-                                {isRefiningPrompt ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                {isRefiningPrompt ? text.refining : text.generatePrompt}
-                            </button>
                         </div>
                     </div>
                 )}

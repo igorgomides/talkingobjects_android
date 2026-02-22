@@ -26,7 +26,7 @@ async function runGenerativeContentWithRetry(model: any, prompt: string, retries
   }
 }
 
-export async function generateScript(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", language: 'en' | 'pt' = 'en') {
+export async function generateScript(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", language: 'en' | 'pt' = 'en'): Promise<{ success: boolean; data?: string; error?: string }> {
   console.log("API Key configured:", !!apiKey);
   console.log("Using Gemini Model:", modelName);
   console.log("Language:", language);
@@ -55,20 +55,21 @@ export async function generateScript(objectName: string, emotion: string, reason
   `;
 
   try {
-    return await runGenerativeContentWithRetry(model, prompt);
+    const text = await runGenerativeContentWithRetry(model, prompt);
+    return { success: true, data: text };
   } catch (error: any) {
     console.error("Erro ao gerar roteiro:", error);
     if (error.status === 429 || error.message?.includes("429")) {
-      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
+      return { success: false, error: `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.` };
     }
     if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.`);
+      return { success: false, error: `Modelo ${modelName} não disponível. Tente 'gemini-2.5-flash'.` };
     }
-    throw new Error("Falha ao gerar roteiro com Gemini");
+    return { success: false, error: error.message || "Falha ao gerar roteiro com Gemini" };
   }
 }
 
-export async function refinePromptV2(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", scenarioContext: string = "standing on a wooden restaurant table, facing the camera directly. The background is a slightly out-of-focus restaurant setting with a family sitting in the background") {
+export async function refinePromptV2(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", scenarioContext: string = "standing on a wooden restaurant table, facing the camera directly. The background is a slightly out-of-focus restaurant setting with a family sitting in the background"): Promise<{ success: boolean; data?: string; error?: string }> {
   console.log("Refining prompt [V2 - Dynamic]...");
   console.log("Using Gemini Model:", modelName);
   console.log("Scenario Context:", scenarioContext);
@@ -98,15 +99,16 @@ export async function refinePromptV2(objectName: string, emotion: string, reason
   `;
 
   try {
-    return await runGenerativeContentWithRetry(model, prompt);
+    const text = await runGenerativeContentWithRetry(model, prompt);
+    return { success: true, data: text };
   } catch (error: any) {
     console.error("Erro ao refinar prompt:", error);
     if (error.status === 429 || error.message?.includes("429")) {
-      throw new Error(`Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.`);
+      return { success: false, error: `Muitas requisições ao Gemini (${modelName}). Tente outro modelo ou aguarde.` };
     }
     if (error.status === 404 || error.message?.includes("404") || error.message?.includes("not found")) {
-      throw new Error(`Modelo ${modelName} não disponível. Tente 'gemini-pro'.`);
+      return { success: false, error: `Modelo ${modelName} não disponível. Tente 'gemini-pro'.` };
     }
-    throw new Error("Falha ao refinar prompt com Gemini");
+    return { success: false, error: error.message || "Falha ao refinar prompt com Gemini" };
   }
 }

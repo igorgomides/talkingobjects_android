@@ -24,7 +24,7 @@ function findKeyRecursive(obj: any, key: string): any {
 // ... existing imports ...
 
 // CHANGED: Use FormData to avoid Next.js JSON serialization limits (Maximum array nesting)
-export async function generateVideoWithVeo(formData: FormData): Promise<string> {
+export async function generateVideoWithVeo(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
     const supabase = await createClient();
 
     // 3. Prepare Request
@@ -99,6 +99,7 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
     let status = 'success';
     let errorMessage = null;
     let videoUri = "";
+    let creditsDeducted = false;
 
     try {
         // 1. Start Operation
@@ -121,7 +122,11 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
         // 2. Deduct Credit (Secure via RPC)
         const { error: updateError } = await supabase.rpc('decrement_credits', { user_id: user.id, amount: creditCost });
 
-        if (updateError) console.error("Failed to deduct credit:", updateError);
+        if (updateError) {
+            console.error("Failed to deduct credit:", updateError);
+        } else {
+            creditsDeducted = true;
+        }
 
         // 2. Poll Operation
         // Veo generation can take a minute or two.
@@ -204,13 +209,25 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
             videoUri += `${separator}key=${apiKey}`;
         }
 
-        return videoUri;
+        return { success: true, url: videoUri };
 
     } catch (error: any) {
         console.error("Erro no processo Veo:", error);
         status = 'error';
         errorMessage = error.message.substring(0, 1000);
-        throw error;
+
+        // Refund if deducted
+        if (creditsDeducted) {
+            console.log("Refunding credits due to Veo failure...");
+            const { error: refundError } = await supabase.rpc('increment_credits', { user_id: user.id, amount: creditCost });
+            if (refundError) {
+                console.error("Failed to refund credit:", refundError);
+            } else {
+                creditsDeducted = false; // Successfully refunded
+            }
+        }
+
+        return { success: false, error: errorMessage };
     } finally {
         // 4. Analytics Logging (Veo)
         const latencyDuration = Date.now() - startTime;
@@ -226,7 +243,7 @@ export async function generateVideoWithVeo(formData: FormData): Promise<string> 
             action_type: 'video',
             model_used: modelId,
             cost_seconds: costSeconds,
-            credits_deducted: status === 'success' ? creditCost : 0,
+            credits_deducted: creditsDeducted ? creditCost : 0,
             latency_ms: latencyDuration,
             status: status,
             error_message: errorMessage,

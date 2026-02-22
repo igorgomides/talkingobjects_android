@@ -91,8 +91,9 @@ export default function Home() {
     setError(null);
     setIsGeneratingScript(true);
     try {
-      const script = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
-      setFormData(prev => ({ ...prev, script }));
+      const result = await generateScript(formData.objectName, formData.emotion, formData.reason, geminiModel, language);
+      if (!result.success) throw new Error(result.error);
+      setFormData(prev => ({ ...prev, script: result.data || "" }));
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar roteiro." : "Error generating script."));
@@ -109,8 +110,9 @@ export default function Home() {
     setError(null);
     setIsRefiningPrompt(true);
     try {
-      const prompt = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel, scenarioContext);
-      setFormData(prev => ({ ...prev, prompt }));
+      const result = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel, scenarioContext);
+      if (!result.success) throw new Error(result.error);
+      setFormData(prev => ({ ...prev, prompt: result.data || "" }));
     } catch (e: any) {
       console.error(e);
       setError(e.message || (language === 'pt' ? "Erro ao gerar prompt." : "Error generating prompt."));
@@ -137,7 +139,9 @@ export default function Home() {
         }
         setStatusMessage(language === 'pt' ? "Gerando imagem com Imagen 4.0..." : "Generating image with Imagen 4.0...");
         // Pass scenarioPrompt to generation function
-        imageUrl = await generateImageWithImagen(formData.prompt, scenarioPrompt);
+        const result = await generateImageWithImagen(formData.prompt, scenarioPrompt);
+        if (!result.success || !result.url) throw new Error(result.error || "Unknown error generating image");
+        imageUrl = result.url;
 
         // Refresh Credits (1 Credit spent)
         window.dispatchEvent(new Event('credits-updated'));
@@ -167,7 +171,12 @@ export default function Home() {
       videoFormData.append('quality', videoQuality); // Pass quality (fast/quality)
       videoFormData.append('duration', videoDuration.toString()); // Pass duration (6/8)
 
-      const videoUrl = await generateVideoWithVeo(videoFormData);
+      const result = await generateVideoWithVeo(videoFormData);
+
+      if (!result.success || !result.url) {
+        throw new Error(result.error || "Unknown error generating video");
+      }
+      const videoUrl = result.url;
 
       // Refresh Credits (10 Credits spent)
       window.dispatchEvent(new Event('credits-updated'));
