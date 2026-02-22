@@ -398,7 +398,7 @@ export default function CreationForm({
                             {activeTab === 'create' && (!formData.script && !isGeneratingScript) && (
                                 <button
                                     type="button"
-                                    className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 w-full justify-center rounded flex items-center gap-1 disabled:opacity-50 transition-all font-bold"
+                                    className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-3 w-full justify-center rounded-md flex items-center gap-2 disabled:opacity-50 transition-all font-bold shadow-md"
                                     onClick={onGenerateScript}
                                     disabled={isGeneratingScript || !formData.objectName}
                                 >
@@ -492,7 +492,7 @@ export default function CreationForm({
                             {(!formData.prompt && !isRefiningPrompt) && (
                                 <button
                                     type="button"
-                                    className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 justify-center rounded w-full flex items-center gap-1 disabled:opacity-50 font-bold transition-all"
+                                    className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-3 justify-center rounded-md w-full flex items-center gap-2 disabled:opacity-50 font-bold transition-all shadow-md"
                                     onClick={handleRefineClick}
                                     disabled={isRefiningPrompt || !formData.objectName}
                                 >
