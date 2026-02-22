@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [4.0.0] - 2026-02-22
+
+### Major Changes
+- **V4.0 UI Redesign**: Completely overhauled the application interface with a modern "futuristic, shiny, and bubbly" aesthetic.
+- **Glassmorphism & Neon**: Implemented global CSS utilities for frosted glass cards (`.glass-card`), translucent inputs (`.glass-input`), and vibrant neon glows mapping to the brand's primary colors.
+- **Bubbly 3D Buttons**: Introduced new interactive `.bubbly-button` styles with satisfying press animations and custom drop shadows.
+
+### Changed
+- **Creation Form & Prompts**: 
+    - Rebuilt the main form inputs to use the new translucent backdrop system.
+    - Integrated `react-textarea-autosize` for dynamic, auto-growing textareas (Script and Prompt) that smoothly expand with content to prevent overlapping with the new 3D floating buttons.
+- **Scenario Selector**: Transformed preset options into floating cards with distinct glowing active states for clear user feedback.
+- **Video Prompt Approval**: Redesigned video quality selectors into neon cards and upgraded the primary "Animate Video" button to a giant gradient pill.
+- **Preview Section**: Standardized final video output containers with glowing neon borders.
+
 ## [3.12.1] - 2026-02-22
 
 ### Changed

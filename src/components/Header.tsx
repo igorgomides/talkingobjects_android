@@ -243,14 +243,14 @@ export default function Header({ user: initialUser }: HeaderProps) {
 
     return (
         <>
-            <header className="w-full border-b border-gray-800 bg-black/50 backdrop-blur-md sticky top-0 z-50 pt-[max(env(safe-area-inset-top),24px)]">
+            <header className="w-full glass-card border-b-0 border-white/10 sticky top-0 z-50 pt-[max(env(safe-area-inset-top),24px)]">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     {/* Logo / Home Link */}
                     <Link href="/" className="font-bold text-xl tracking-tighter text-white flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0 shadow-neon-blue">
                             <span className="text-lg">🤖</span>
                         </div>
-                        <span className="text-lg">Talking Objects</span>
+                        <span className="text-lg text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Talking Objects</span>
                     </Link>
 
                     {/* Right Side: Hamburger or Login */}
@@ -278,10 +278,10 @@ export default function Header({ user: initialUser }: HeaderProps) {
 
             {/* Mobile Menu Overlay - Move to Portal */}
             {isMenuOpen && mounted && createPortal(
-                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMenuOpen(false)}>
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMenuOpen(false)}>
                     <div
-                        className="absolute right-0 top-0 h-full w-[280px] bg-black border-l border-gray-800 p-6 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 transform z-[101]"
-                        style={{ backgroundColor: '#0f172a', isolation: 'isolate' }}
+                        className="absolute right-0 top-0 h-full w-[280px] glass-card border-l border-white/10 p-6 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 transform z-[101]"
+                        style={{ isolation: 'isolate' }}
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Menu Header */}
@@ -297,7 +297,7 @@ export default function Header({ user: initialUser }: HeaderProps) {
 
                         {/* User Info */}
                         <div className="flex flex-col items-center gap-4 mb-8">
-                            <div className="w-20 h-20 rounded-full bg-gray-800 border-2 border-purple-500/30 overflow-hidden">
+                            <div className="w-20 h-20 rounded-full glass-card border border-purple-500/50 shadow-neon-purple overflow-hidden flex items-center justify-center">
                                 {avatarUrl ? (
                                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
@@ -313,7 +313,7 @@ export default function Header({ user: initialUser }: HeaderProps) {
                         </div>
 
                         {/* Credits */}
-                        <div className="bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-700">
+                        <div className="glass-card rounded-xl p-4 mb-6 transition-all shadow-neon-blue">
                             <p className="text-gray-400 text-xs uppercase font-bold mb-1">{text.credits}</p>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -323,7 +323,7 @@ export default function Header({ user: initialUser }: HeaderProps) {
                                 <Link
                                     href="/credits"
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white hover:bg-purple-500 transition-colors"
+                                    className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-bubbly-purple bubbly-button"
                                 >
                                     +
                                 </Link>

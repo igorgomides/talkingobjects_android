@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Clapperboard, CheckCircle2, RefreshCw } from 'lucide-react';
 import { compositeLogo } from '@/utils/canvas-helper';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface VideoPromptApprovalProps {
     imageUrl: string;
@@ -74,7 +75,9 @@ Ensure that the intonation matches the character's emotion.
     };
 
     return (
-        <div className="p-6 bg-gray-900 rounded-lg shadow-xl border border-blue-500/30 space-y-6">
+        <div className="glass-card p-6 rounded-2xl shadow-2xl space-y-6 relative overflow-hidden mt-6">
+            {/* Ambient Background Glow inside the card */}
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <Clapperboard className="text-blue-400" />
                 {language === 'pt' ? "Aprovar Vídeo Final" : "Approve Final Video"}
@@ -86,12 +89,12 @@ Ensure that the intonation matches the character's emotion.
                     <label className="text-sm font-medium text-gray-400">
                         {language === 'pt' ? "Visual Final (com Logo)" : "Final Visual (with Logo)"}
                     </label>
-                    <div className="relative aspect-[9/16] w-full max-w-[200px] mx-auto rounded-lg overflow-hidden border border-gray-700 bg-black">
+                    <div className="relative aspect-[9/16] w-full max-w-[200px] mx-auto rounded-xl overflow-hidden glass-card p-1">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={compositedImage}
                             alt="Final Preview"
-                            className={`w-full h-full object-cover transition-opacity duration-300 ${isCompositing ? 'opacity-50' : 'opacity-100'}`}
+                            className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${isCompositing ? 'opacity-50' : 'opacity-100'}`}
                         />
                         {isCompositing && (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -106,10 +109,11 @@ Ensure that the intonation matches the character's emotion.
                     <label className="text-sm font-medium text-gray-400">
                         {language === 'pt' ? "Instruções para a IA (Veo)" : "AI Instructions (Veo)"}
                     </label>
-                    <textarea
+                    <TextareaAutosize
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        className="flex-1 w-full bg-gray-800 text-white rounded-md p-3 border border-gray-600 focus:border-blue-500 font-mono text-sm resize-none"
+                        minRows={4}
+                        className="glass-input flex-1 w-full text-white rounded-xl p-4 outline-none font-mono text-sm resize-none shadow-inner overflow-hidden"
                     />
                     <p className="text-xs text-gray-500">
                         {language === 'pt'
@@ -121,60 +125,62 @@ Ensure that the intonation matches the character's emotion.
                 {/* Video Settings (Quality & Duration) */}
                 <div className="md:col-span-2 space-y-4">
                     {/* Video Duration Selector */}
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                        <label className="block text-sm font-medium text-blue-300 mb-2">
+                    <div className="glass-card p-5 rounded-xl border border-white/10 relative">
+                        <label className="block text-sm font-bold text-blue-300 mb-3 uppercase tracking-widest">
                             {language === 'pt' ? "Duração do Vídeo" : "Video Duration"}
                         </label>
                         <div className="grid grid-cols-2 gap-4">
-                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoDuration === 6 ? 'bg-blue-900/40 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                            <label className={`cursor-pointer p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${videoDuration === 6 ? 'glass-card border-blue-400 shadow-neon-blue scale-[1.02] z-10 text-white' : 'bg-black/20 border-white/10 text-gray-400 hover:bg-black/40 hover:border-white/30'}`}>
                                 <input type="radio" name="duration" value={6} checked={videoDuration === 6} onChange={() => setVideoDuration(6)} className="hidden" />
-                                <span className="font-bold text-white text-base">6 {language === 'pt' ? "Segundos" : "Seconds"}</span>
+                                <span className="font-bold text-lg">6 {language === 'pt' ? "Segundos" : "Seconds"}</span>
                             </label>
 
-                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoDuration === 8 ? 'bg-blue-900/40 border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                            <label className={`cursor-pointer p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${videoDuration === 8 ? 'glass-card border-blue-400 shadow-neon-blue scale-[1.02] z-10 text-white' : 'bg-black/20 border-white/10 text-gray-400 hover:bg-black/40 hover:border-white/30'}`}>
                                 <input type="radio" name="duration" value={8} checked={videoDuration === 8} onChange={() => setVideoDuration(8)} className="hidden" />
-                                <span className="font-bold text-white text-base">8 {language === 'pt' ? "Segundos" : "Seconds"}</span>
+                                <span className="font-bold text-lg">8 {language === 'pt' ? "Segundos" : "Seconds"}</span>
                             </label>
                         </div>
                     </div>
 
                     {/* Video Quality Selector */}
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
-                        <label className="block text-sm font-medium text-purple-300 mb-2">
+                    <div className="glass-card p-5 rounded-xl border border-white/10 relative">
+                        <label className="block text-sm font-bold text-purple-300 mb-3 uppercase tracking-widest">
                             {language === 'pt' ? "Qualidade do Vídeo" : "Video Quality"}
                         </label>
                         <div className="grid grid-cols-2 gap-4">
-                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'fast' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                            <label className={`cursor-pointer p-5 rounded-xl border transition-all flex flex-col items-center gap-2 text-center h-full justify-center ${videoQuality === 'fast' ? 'glass-card border-purple-400 shadow-neon-purple scale-[1.02] z-10 text-white' : 'bg-black/20 border-white/10 text-gray-400 hover:bg-black/40 hover:border-white/30'}`}>
                                 <input type="radio" name="quality" value="fast" checked={videoQuality === 'fast'} onChange={() => setVideoQuality('fast')} className="hidden" />
-                                <span className="font-bold text-white text-base">{language === 'pt' ? "Rápido (Padrão)" : "Fast (Standard)"}</span>
-                                <span className="text-sm text-green-400 font-mono">{videoDuration === 6 ? 15 : 25} {language === 'pt' ? "créditos" : "credits"}</span>
+                                <span className="bg-purple-900/50 p-3 rounded-full mb-1">⚡</span>
+                                <span className="font-bold text-md leading-tight">{language === 'pt' ? "Rápido (Padrão)" : "Fast Mode"}</span>
+                                <span className={`text-base font-bold ${videoQuality === 'fast' ? 'text-green-300' : 'text-gray-500'}`}>{videoDuration === 6 ? 15 : 25} {language === 'pt' ? "créditos" : "cr"}</span>
                             </label>
 
-                            <label className={`cursor-pointer p-4 rounded-lg border flex flex-col items-center gap-1 transition-all ${videoQuality === 'quality' ? 'bg-purple-900/40 border-purple-500 shadow-sm shadow-purple-500/20' : 'bg-gray-800 border-gray-700 hover:border-gray-600'}`}>
+                            <label className={`cursor-pointer p-5 rounded-xl border transition-all flex flex-col items-center gap-2 text-center h-full justify-center ${videoQuality === 'quality' ? 'glass-card border-purple-400 shadow-neon-purple scale-[1.02] z-10 text-white' : 'bg-black/20 border-white/10 text-gray-400 hover:bg-black/40 hover:border-white/30'}`}>
                                 <input type="radio" name="quality" value="quality" checked={videoQuality === 'quality'} onChange={() => setVideoQuality('quality')} className="hidden" />
-                                <span className="font-bold text-white text-base">{language === 'pt' ? "Alta Qualidade (Pro)" : "High Quality (Pro)"}</span>
-                                <span className="text-sm text-yellow-400 font-mono">{videoDuration === 6 ? 40 : 60} {language === 'pt' ? "créditos" : "credits"}</span>
+                                <span className="bg-purple-900/50 p-3 rounded-full mb-1">💎</span>
+                                <span className="font-bold text-md leading-tight">{language === 'pt' ? "Alta Qualidade (Pro)" : "High Quality"}</span>
+                                <span className={`text-base font-bold ${videoQuality === 'quality' ? 'text-yellow-300' : 'text-gray-500'}`}>{videoDuration === 6 ? 40 : 60} {language === 'pt' ? "créditos" : "cr"}</span>
                             </label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-4 pt-6 flex-col md:flex-row relative z-10">
                 <button
                     onClick={onCancel}
                     disabled={isLoading}
-                    className="flex-1 py-3 rounded-md border border-gray-600 text-gray-300 hover:bg-gray-800 transition-colors"
+                    className="md:flex-none md:w-1/3 py-4 rounded-full border border-white/20 text-gray-300 hover:bg-white/10 transition-all font-bold glass-card"
                 >
                     {language === 'pt' ? "Voltar" : "Back"}
                 </button>
                 <button
                     onClick={handleApprove}
                     disabled={isLoading || isCompositing}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-md transition-colors flex justify-center items-center gap-2"
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-full transition-all flex justify-center items-center gap-2 text-lg shadow-bubbly-purple bubbly-button disabled:opacity-50"
                 >
-                    {isLoading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
-                    {language === 'pt' ? "Confirmar e Gerar Vídeo" : "Confirm & Generate Video"}
+                    {isLoading ? <Loader2 className="animate-spin" /> : <Clapperboard fill="currentColor" size={20} />}
+                    {language === 'pt' ? "Animar Vídeo" : "Animate Video"}
                 </button>
             </div>
         </div>

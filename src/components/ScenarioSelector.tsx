@@ -107,10 +107,10 @@ export default function ScenarioSelector({
                             type="button"
                             onClick={() => handleSelect(scenario)}
                             className={`
-                                flex flex-col items-center justify-center gap-2 p-3 rounded-lg border transition-all text-xs font-medium text-center
+                                flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all text-xs font-bold text-center
                                 ${isSelected
-                                    ? 'bg-purple-900/40 border-purple-500 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
-                                    : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600'}
+                                    ? 'glass-card border-purple-400 text-purple-200 shadow-neon-purple scale-105 z-10'
+                                    : 'bg-black/20 border-white/10 text-gray-400 hover:bg-black/40 hover:border-white/20'}
                             `}
                         >
                             <Icon size={20} className={isSelected ? 'text-purple-400' : 'text-gray-500'} />
@@ -127,7 +127,7 @@ export default function ScenarioSelector({
                         value={customPrompt}
                         onChange={(e) => setCustomPrompt(e.target.value)}
                         placeholder={language === 'en' ? "Ex: On a sunny beach..." : "Ex: Numa praia ensolarada..."}
-                        className="w-full bg-gray-900 text-white text-sm rounded-md p-2 border border-purple-500/50 focus:border-purple-500 outline-none placeholder-gray-600"
+                        className="glass-input w-full text-white text-sm rounded-lg p-3 outline-none mt-2 shadow-inner"
                     />
                 </div>
             )}

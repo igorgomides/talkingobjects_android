@@ -1,0 +1,49 @@
+--- src/components/CreationForm.tsx
++++ src/components/CreationForm.tsx
+@@ -406,8 +406,8 @@
+                                     {isGeneratingScript ? text.generating : text.generateScript}
+                                 </button>
+                             )}
+                         </div>
+-                        {(formData.script || isGeneratingScript || showFavorites || activeTab === 'upload') && (
++                        {(formData.script || isGeneratingScript || showFavorites || activeTab === 'upload' || activeTab === 'create') && (
++                            <div style={{ display: (formData.script || isGeneratingScript || showFavorites || activeTab === 'upload') ? 'block' : 'none' }}>
+                             <div className="relative mt-1">
+                                 <button
+                                     type="button"
+@@ -446,6 +446,7 @@
+                                 )}
+                             </div>
+-                    </div>
+                     <div className="relative">
+                         <textarea
+                             name="script"
+@@ -477,7 +478,8 @@
+                                 {language === 'pt' ? 'Regerar' : 'Regenerate'}
+                             </button>
+                     </div>
+-                        )}
++                            </div>
++                        )}
+                 </div>
+ 
+@@ -497,6 +499,7 @@
+                                 </button>
+                             )}
+                         </div>
+-                        {(formData.prompt || isRefiningPrompt) && (
++                        <div style={{ display: (formData.prompt || isRefiningPrompt) ? 'block' : 'none' }}>
+                             <div className="relative">
+                                 <textarea
+                                     name="prompt"
+@@ -508,8 +511,8 @@
+                                     className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2"
+                                 />
+                             </div>
+-                    </div>
+-                )}
++                        </div>
++                    </div>
++                )}
+ 
+                 {/* COMMON: Voice & Logo */}

@@ -1,8 +1,8 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import { Loader2, Wand2, Sparkles, Upload, Music, Star, Trash2 } from 'lucide-react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { createClient } from '@/utils/supabase/client';
 import ScenarioSelector, { SCENARIOS } from './ScenarioSelector';
 
@@ -263,45 +263,48 @@ export default function CreationForm({
     };
 
     return (
-        <div className="bg-gray-900 rounded-lg shadow-xl border border-purple-500/30 overflow-hidden">
+        <div className="glass-card rounded-2xl shadow-2xl relative overflow-hidden">
+            {/* Ambient Background Glow inside the card */}
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
 
             {/* TABS */}
-            <div className="flex border-b border-gray-700">
+            <div className="flex border-b border-white/10 relative z-10">
                 <button
                     type="button"
                     onClick={() => setActiveTab('create')}
-                    className={`flex-1 py-3 text-sm font-bold transition-colors ${activeTab === 'create' ? 'bg-gray-800 text-purple-400 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'create' ? 'text-purple-300 border-b-2 border-purple-400 shadow-[0_2px_10px_rgba(168,85,247,0.3)]' : 'text-gray-500 hover:text-gray-300'}`}
                 >
                     {text.tabCreate}
                 </button>
                 <button
                     type="button"
                     onClick={() => setActiveTab('upload')}
-                    className={`flex-1 py-3 text-sm font-bold transition-colors ${activeTab === 'upload' ? 'bg-gray-800 text-blue-400 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-300'}`}
+                    className={`flex-1 py-4 text-sm font-bold transition-colors ${activeTab === 'upload' ? 'text-blue-300 border-b-2 border-blue-400 shadow-[0_2px_10px_rgba(59,130,246,0.3)]' : 'text-gray-500 hover:text-gray-300'}`}
                 >
                     {text.tabUpload}
                 </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleFormSubmit} className="p-6 space-y-5 relative z-10">
 
                 {/* CREATE MODE: Inputs */}
                 {activeTab === 'create' && (
                     <>
                         {/* Collapsible Advanced Settings */}
                         <div className="mb-4">
-                            <details className="group bg-gray-800/50 rounded-lg border border-gray-700 overflow-hidden transition-all duration-300">
-                                <summary className="flex items-center justify-between p-3 cursor-pointer select-none text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-white hover:bg-gray-800">
+                            <details className="group glass-card rounded-xl border border-white/10 overflow-hidden transition-all duration-300">
+                                <summary className="flex items-center justify-between p-4 cursor-pointer select-none text-xs font-bold text-purple-300 uppercase tracking-widest hover:text-white hover:bg-white/5">
                                     <span>⚙️ {language === 'pt' ? 'Configurações Avançadas' : 'Advanced Settings'}</span>
                                     <span className="transform group-open:rotate-180 transition-transform">▼</span>
                                 </summary>
-                                <div className="p-3 border-t border-gray-700 flex flex-col gap-3 bg-gray-900/50">
+                                <div className="p-4 border-t border-white/10 flex flex-col gap-4 bg-black/20">
                                     <div className="flex flex-col gap-1">
                                         <label className="text-[10px] font-bold text-purple-300 uppercase tracking-widest">{text.modelLabel}</label>
                                         <select
                                             value={geminiModel}
                                             onChange={(e) => setGeminiModel(e.target.value)}
-                                            className="bg-gray-800 text-white text-xs rounded px-2 py-2 border border-gray-600 focus:border-purple-500 outline-none"
+                                            className="glass-input text-white text-xs rounded-md px-3 py-2 outline-none w-full"
                                         >
                                             <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                                             <option value="gemini-flash-latest">Gemini Flash Latest</option>
@@ -313,7 +316,7 @@ export default function CreationForm({
                                         <select
                                             value={veoModel}
                                             onChange={(e) => setVeoModel(e.target.value)}
-                                            className="bg-gray-800 text-white text-xs rounded px-2 py-2 border border-gray-600 focus:border-blue-500 outline-none"
+                                            className="glass-input text-white text-xs rounded-md px-3 py-2 outline-none w-full"
                                         >
                                             <option value="veo-3.1-generate-preview">Veo 3.1 Preview (Standard)</option>
                                             <option value="veo-3.1-fast-generate-preview">Veo 3.1 Fast (Preview)</option>
@@ -330,7 +333,7 @@ export default function CreationForm({
                                 value={formData.objectName}
                                 onChange={handleChange}
                                 placeholder={text.objectPlaceholder}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                                className="glass-input w-full text-white rounded-md p-3 outline-none shadow-inner"
                             />
                         </div>
 
@@ -340,7 +343,7 @@ export default function CreationForm({
                                 name="emotion"
                                 value={formData.emotion}
                                 onChange={handleChange}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none"
+                                className="glass-input w-full text-white rounded-md p-3 outline-none"
                             >
                                 <option value="Com muita Raiva">{text.emotions.angry}</option>
                                 <option value="Sarcástico">{text.emotions.sarcastic}</option>
@@ -356,7 +359,7 @@ export default function CreationForm({
                                 value={formData.reason}
                                 onChange={handleChange}
                                 placeholder={text.reasonPlaceholder}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none"
+                                className="glass-input w-full text-white rounded-md p-3 outline-none shadow-inner"
                             />
                         </div>
 
@@ -375,9 +378,9 @@ export default function CreationForm({
 
                 {/* UPLOAD MODE: Image Input */}
                 {activeTab === 'upload' && (
-                    <div className="p-6 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-blue-500 transition-colors bg-gray-800/50">
-                        <Upload className="text-gray-400" size={32} />
-                        <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-bold transition-colors">
+                    <div className="p-6 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center gap-4 hover:border-blue-400 transition-colors glass-card">
+                        <Upload className="text-blue-400" size={32} />
+                        <label className="cursor-pointer bg-blue-600 text-white px-5 py-3 rounded-lg font-bold transition-all bubbly-button shadow-bubbly-blue">
                             {text.uploadImageLabel}
                             <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} className="hidden" />
                         </label>
@@ -398,11 +401,11 @@ export default function CreationForm({
                             {activeTab === 'create' && (!formData.script && !isGeneratingScript) && (
                                 <button
                                     type="button"
-                                    className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-3 w-full justify-center rounded-md flex items-center gap-2 disabled:opacity-50 transition-all font-bold shadow-md"
+                                    className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-4 w-full justify-center rounded-xl flex items-center gap-2 disabled:opacity-50 transition-all font-bold bubbly-button shadow-bubbly-purple"
                                     onClick={onGenerateScript}
                                     disabled={isGeneratingScript || !formData.objectName}
                                 >
-                                    {isGeneratingScript ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+                                    {isGeneratingScript ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
                                     {isGeneratingScript ? text.generating : text.generateScript}
                                 </button>
                             )}
@@ -452,15 +455,14 @@ export default function CreationForm({
 
                     {(formData.script || isGeneratingScript || activeTab === 'upload') && (
                         <div className="relative">
-                            <textarea
+                            <TextareaAutosize
                                 name="script"
                                 value={formData.script}
                                 onChange={handleChange}
                                 disabled={isGeneratingScript}
                                 placeholder={isGeneratingScript ? text.generating : text.scriptPlaceholder}
-                                rows={3}
-                                className={`w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2 transition-opacity ${isGeneratingScript ? 'opacity-50 cursor-wait' : ''}`}
-
+                                minRows={3}
+                                className={`glass-input w-full text-white rounded-md p-3 outline-none pr-8 pb-12 shadow-inner transition-opacity resize-none overflow-hidden ${isGeneratingScript ? 'opacity-50 cursor-wait' : ''}`}
                             />
                             <button
                                 type="button"
@@ -473,7 +475,7 @@ export default function CreationForm({
 
                             <button
                                 type="button"
-                                className="absolute bottom-2 right-10 text-xs bg-purple-600/50 hover:bg-purple-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                                className="absolute bottom-2 right-10 text-xs bg-purple-600 text-white px-3 py-1.5 rounded-md flex items-center gap-1 font-bold bubbly-button shadow-bubbly-purple"
                                 onClick={onGenerateScript}
                                 disabled={isGeneratingScript || !formData.objectName}
                             >
@@ -492,11 +494,11 @@ export default function CreationForm({
                             {(!formData.prompt && !isRefiningPrompt) && (
                                 <button
                                     type="button"
-                                    className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-3 justify-center rounded-md w-full flex items-center gap-2 disabled:opacity-50 font-bold transition-all shadow-md"
+                                    className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-4 justify-center rounded-xl w-full flex items-center gap-2 disabled:opacity-50 font-bold transition-all bubbly-button shadow-bubbly-blue"
                                     onClick={handleRefineClick}
                                     disabled={isRefiningPrompt || !formData.objectName}
                                 >
-                                    {isRefiningPrompt ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                    {isRefiningPrompt ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                                     {isRefiningPrompt ? text.refining : text.generatePrompt}
                                 </button>
                             )}
@@ -504,19 +506,19 @@ export default function CreationForm({
 
                         {(formData.prompt || isRefiningPrompt) && (
                             <div className="relative">
-                                <textarea
+                                <TextareaAutosize
                                     name="prompt"
                                     value={formData.prompt || ''}
                                     onChange={handleChange}
                                     disabled={isRefiningPrompt}
                                     placeholder={isRefiningPrompt ? text.refining : text.promptPlaceholder}
-                                    rows={4}
-                                    className={`w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2 transition-opacity ${isRefiningPrompt ? 'opacity-50 cursor-wait' : ''}`}
+                                    minRows={4}
+                                    className={`glass-input w-full text-white rounded-md p-3 outline-none font-mono text-sm text-gray-300 pb-12 shadow-inner transition-opacity resize-none overflow-hidden ${isRefiningPrompt ? 'opacity-50 cursor-wait' : ''}`}
                                 />
 
                                 <button
                                     type="button"
-                                    className="absolute bottom-2 right-2 text-xs bg-blue-600/50 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center gap-1 disabled:opacity-50"
+                                    className="absolute bottom-2 right-2 text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md flex items-center gap-1 disabled:opacity-50 font-bold bubbly-button shadow-bubbly-blue"
                                     onClick={handleRefineClick}
                                     disabled={isRefiningPrompt || !formData.objectName}
                                 >
@@ -537,7 +539,7 @@ export default function CreationForm({
                         <select
                             value={voiceStyle}
                             onChange={(e) => setVoiceStyle(e.target.value)}
-                            className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none text-sm"
+                            className="glass-input w-full text-white rounded-md p-3 outline-none text-sm"
                         >
                             <option value="Cartoon / Expressive">{text.voices.cartoon}</option>
                             <option value="Monster / Deep">{text.voices.monster}</option>
@@ -574,7 +576,7 @@ export default function CreationForm({
                 <button
                     type="submit"
                     disabled={isLoading || (activeTab === 'create' && !formData.prompt) || (activeTab === 'upload' && !uploadedImage)}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-md transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-xl transition-all flex justify-center items-center gap-2 disabled:opacity-50 mt-6 bubbly-button shadow-bubbly-purple text-lg"
                 >
                     {isLoading ? <Loader2 className="animate-spin" /> : text.approveButton}
                 </button>

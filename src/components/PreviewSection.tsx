@@ -37,8 +37,8 @@ export default function PreviewSection({ imageUrl, videoUrl, isGenerating, langu
 
     if (!imageUrl && !videoUrl && !isGenerating) {
         return (
-            <div className="flex flex-col items-center justify-center h-full min-h-[400px] border-2 border-dashed border-gray-700 rounded-lg text-gray-500">
-                <p>{text.placeholder}</p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[400px] border-2 border-dashed border-white/20 rounded-2xl text-gray-500 glass-card">
+                <p className="font-medium animate-pulse">{text.placeholder}</p>
             </div>
         );
     }
@@ -51,11 +51,11 @@ export default function PreviewSection({ imageUrl, videoUrl, isGenerating, langu
                     <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider">
                         {videoUrl ? text.baseImage : text.preview}
                     </h3>
-                    <div className="relative aspect-[9/16] w-full max-w-[200px] mx-auto rounded-lg overflow-hidden border-2 border-purple-500 shadow-lg shadow-purple-500/20">
+                    <div className="relative aspect-[9/16] w-full max-w-[200px] mx-auto rounded-xl overflow-hidden glass-card p-1 border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={imageUrl} alt="Generated Preview" className="object-cover w-full h-full" />
+                        <img src={imageUrl} alt="Generated Preview" className="object-cover w-full h-full rounded-lg" />
                         {isGenerating && !videoUrl && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                                 <p className="text-white font-bold animate-pulse">{text.generating}</p>
                             </div>
                         )}
@@ -76,15 +76,15 @@ export default function PreviewSection({ imageUrl, videoUrl, isGenerating, langu
                     <h3 className="text-green-400 text-sm font-bold uppercase tracking-wider animate-pulse">
                         {text.finalVideo}
                     </h3>
-                    <div className="relative aspect-[9/16] w-full max-w-[300px] rounded-lg overflow-hidden border-2 border-green-500 shadow-lg shadow-green-500/20">
-                        <video src={videoUrl} controls className="w-full h-full object-cover" />
+                    <div className="relative aspect-[9/16] w-full max-w-[300px] rounded-2xl overflow-hidden glass-card p-2 border border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
+                        <video src={videoUrl} controls className="w-full h-full object-cover rounded-xl" />
                     </div>
                     <a
                         href={videoUrl}
                         download="viral-video.mp4"
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-bold transition-all"
+                        className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-full font-bold transition-all text-lg bubbly-button shadow-bubbly-green mt-4"
                     >
-                        <Download size={20} /> {text.downloadVideo}
+                        <Download size={24} /> {text.downloadVideo}
                     </a>
                 </div>
             )}
