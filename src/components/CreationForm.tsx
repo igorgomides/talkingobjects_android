@@ -395,76 +395,92 @@ export default function CreationForm({
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex flex-col gap-2">
                             <label className="block text-sm font-medium text-purple-300">{text.scriptLabel}</label>
-                            {activeTab === 'create' && (
+                            {activeTab === 'create' && (!formData.script && !isGeneratingScript) && (
                                 <button
                                     type="button"
-                                    className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 w-fit rounded flex items-center gap-1 disabled:opacity-50"
+                                    className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 w-full justify-center rounded flex items-center gap-1 disabled:opacity-50 transition-all font-bold"
                                     onClick={onGenerateScript}
                                     disabled={isGeneratingScript || !formData.objectName}
                                 >
-                                    {isGeneratingScript ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                                    {isGeneratingScript ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
                                     {isGeneratingScript ? text.generating : text.generateScript}
                                 </button>
                             )}
                         </div>
-                        <div className="relative mt-1">
+
+                        {(formData.script || isGeneratingScript || showFavorites || activeTab === 'upload') && (
+                            <div className="relative mt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFavorites(!showFavorites)}
+                                    className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1"
+                                >
+                                    <Star size={12} fill={showFavorites ? "currentColor" : "none"} /> {text.favorites}
+                                </button>
+
+                                {showFavorites && (
+                                    <div className="absolute right-0 top-6 w-64 bg-gray-800 border border-gray-600 rounded-md shadow-xl z-20 max-h-48 overflow-y-auto">
+                                        {favorites.length === 0 ? (
+                                            <p className="p-2 text-xs text-gray-400 text-center">{text.noFavorites}</p>
+                                        ) : (
+                                            favorites.map((fav, i) => (
+                                                <div key={i} className="p-2 hover:bg-gray-700 flex justify-between items-start gap-2 border-b border-gray-700 last:border-0">
+                                                    <p
+                                                        className="text-xs text-gray-300 cursor-pointer flex-1 line-clamp-2"
+                                                        onClick={() => {
+                                                            setFormData({ ...formData, script: fav });
+                                                            setShowFavorites(false);
+                                                        }}
+                                                    >
+                                                        {fav}
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => { e.stopPropagation(); toggleFavorite(fav); }}
+                                                        className="text-red-400 hover:text-red-300"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {(formData.script || isGeneratingScript || activeTab === 'upload') && (
+                        <div className="relative">
+                            <textarea
+                                name="script"
+                                value={formData.script}
+                                onChange={handleChange}
+                                placeholder={text.scriptPlaceholder}
+                                rows={3}
+                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2"
+
+                            />
                             <button
                                 type="button"
-                                onClick={() => setShowFavorites(!showFavorites)}
-                                className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1"
+                                onClick={() => toggleFavorite(formData.script)}
+                                className={`absolute top-2 right-2 ${favorites.includes(formData.script) ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'}`}
+                                title={text.saveFavorite}
                             >
-                                <Star size={12} fill={showFavorites ? "currentColor" : "none"} /> {text.favorites}
+                                <Star size={16} fill={favorites.includes(formData.script) ? "currentColor" : "none"} />
                             </button>
 
-                            {showFavorites && (
-                                <div className="absolute right-0 top-6 w-64 bg-gray-800 border border-gray-600 rounded-md shadow-xl z-20 max-h-48 overflow-y-auto">
-                                    {favorites.length === 0 ? (
-                                        <p className="p-2 text-xs text-gray-400 text-center">{text.noFavorites}</p>
-                                    ) : (
-                                        favorites.map((fav, i) => (
-                                            <div key={i} className="p-2 hover:bg-gray-700 flex justify-between items-start gap-2 border-b border-gray-700 last:border-0">
-                                                <p
-                                                    className="text-xs text-gray-300 cursor-pointer flex-1 line-clamp-2"
-                                                    onClick={() => {
-                                                        setFormData({ ...formData, script: fav });
-                                                        setShowFavorites(false);
-                                                    }}
-                                                >
-                                                    {fav}
-                                                </p>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); toggleFavorite(fav); }}
-                                                    className="text-red-400 hover:text-red-300"
-                                                >
-                                                    <Trash2 size={12} />
-                                                </button>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            )}
+                            <button
+                                type="button"
+                                className="absolute bottom-2 right-10 text-xs bg-purple-600/50 hover:bg-purple-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                                onClick={onGenerateScript}
+                                disabled={isGeneratingScript || !formData.objectName}
+                            >
+                                {isGeneratingScript ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                                {language === 'pt' ? 'Regerar' : 'Regenerate'}
+                            </button>
                         </div>
-                    </div>
-                    <div className="relative">
-                        <textarea
-                            name="script"
-                            value={formData.script}
-                            onChange={handleChange}
-                            placeholder={text.scriptPlaceholder}
-                            rows={3}
-                            className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2"
-
-                        />
-                        <button
-                            type="button"
-                            onClick={() => toggleFavorite(formData.script)}
-                            className={`absolute top-2 right-2 ${favorites.includes(formData.script) ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'}`}
-                            title={text.saveFavorite}
-                        >
-                            <Star size={16} fill={favorites.includes(formData.script) ? "currentColor" : "none"} />
-                        </button>
-                    </div>
+                    )}
                 </div>
 
                 {/* CREATE MODE: Prompt Input */}
@@ -472,26 +488,41 @@ export default function CreationForm({
                     <div>
                         <div className="flex flex-col gap-2 mb-2">
                             <label className="block text-sm font-medium text-purple-300">{text.promptLabel}</label>
-                            <button
-                                type="button"
-                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded w-fit flex items-center gap-1 disabled:opacity-50"
-                                onClick={handleRefineClick}
-                                disabled={isRefiningPrompt || !formData.objectName}
-                            >
-                                {isRefiningPrompt ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                {isRefiningPrompt ? text.refining : text.generatePrompt}
-                            </button>
+                            {(!formData.prompt && !isRefiningPrompt) && (
+                                <button
+                                    type="button"
+                                    className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 justify-center rounded w-full flex items-center gap-1 disabled:opacity-50 font-bold transition-all"
+                                    onClick={handleRefineClick}
+                                    disabled={isRefiningPrompt || !formData.objectName}
+                                >
+                                    {isRefiningPrompt ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                    {isRefiningPrompt ? text.refining : text.generatePrompt}
+                                </button>
+                            )}
                         </div>
-                        <div className="relative">
-                            <textarea
-                                name="prompt"
-                                value={formData.prompt || ''}
-                                onChange={handleChange}
-                                placeholder={text.promptPlaceholder}
-                                rows={4}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2"
-                            />
-                        </div>
+
+                        {(formData.prompt || isRefiningPrompt) && (
+                            <div className="relative">
+                                <textarea
+                                    name="prompt"
+                                    value={formData.prompt || ''}
+                                    onChange={handleChange}
+                                    placeholder={text.promptPlaceholder}
+                                    rows={4}
+                                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2"
+                                />
+
+                                <button
+                                    type="button"
+                                    className="absolute bottom-2 right-2 text-xs bg-blue-600/50 hover:bg-blue-600 text-white px-2 py-1 rounded flex items-center gap-1 disabled:opacity-50"
+                                    onClick={handleRefineClick}
+                                    disabled={isRefiningPrompt || !formData.objectName}
+                                >
+                                    {isRefiningPrompt ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                    {language === 'pt' ? 'Regerar' : 'Regenerate'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
