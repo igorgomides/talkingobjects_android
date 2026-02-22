@@ -456,9 +456,10 @@ export default function CreationForm({
                                 name="script"
                                 value={formData.script}
                                 onChange={handleChange}
-                                placeholder={text.scriptPlaceholder}
+                                disabled={isGeneratingScript}
+                                placeholder={isGeneratingScript ? text.generating : text.scriptPlaceholder}
                                 rows={3}
-                                className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2"
+                                className={`w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none pr-8 pb-2 transition-opacity ${isGeneratingScript ? 'opacity-50 cursor-wait' : ''}`}
 
                             />
                             <button
@@ -507,9 +508,10 @@ export default function CreationForm({
                                     name="prompt"
                                     value={formData.prompt || ''}
                                     onChange={handleChange}
-                                    placeholder={text.promptPlaceholder}
+                                    disabled={isRefiningPrompt}
+                                    placeholder={isRefiningPrompt ? text.refining : text.promptPlaceholder}
                                     rows={4}
-                                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2"
+                                    className={`w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700 focus:border-purple-500 outline-none font-mono text-sm text-gray-300 pb-2 transition-opacity ${isRefiningPrompt ? 'opacity-50 cursor-wait' : ''}`}
                                 />
 
                                 <button
