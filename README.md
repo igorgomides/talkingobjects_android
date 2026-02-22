@@ -2,12 +2,12 @@
 
 A Next.js application designed to create viral "Talking Objects" videos for Instagram Reels and TikTok. It leverages the power of Google's **Gemini** for scriptwriting, **Imagen** for high-quality 3D image generation, and **Veo** for video animation.
 
-## ✨ Features (v3.8 SaaS Edition)
+## ✨ Features (v3.12.1 SaaS Edition)
 
 -   **📱 Mobile-First Design**:
     -   **Responsive UI**: Optimized for mobile devices with touch-friendly inputs.
     -   **App-Like Experience**: Native status bar integration, safe area handling, and smooth transitions.
-    -   **Wizard Flow**: Step-by-step creation process (Script -> Image -> Video) for simplicity.
+    -   **Wizard Flow**: Step-by-step creation process (Script -> Image -> Video) for simplicity. Dynamic inputs guide users and prevent editing before AI generation finishes.
     -   **Hamburger Menu**: Clean navigation with slide-out drawer for user settings.
     -   **Interactive Tutorial**: Beautiful animated `/tutorial` page explaining all features, fully localized in EN/PT, featuring real mobile-optimized app screenshots.
 
@@ -22,6 +22,7 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
     -   **Lead Capture Landing Page** (`/invite`) with integrated video showcase and "Golden Tip" credit strategy.
     -   **Dual Whitelist System**: Access control supporting both Premium Alpha users and Beta Invite leads.
     -   Professional Flow: Sign Up, Forgot Password, Reset Password.
+    -   **Reliable Error Handling**: Cloud functions smartly return specific errors (e.g., rate limits, prompt blocks) to the client, preventing opaque server faults.
 
 -   **💳 Monetization & Credits**:
     -   **Stripe Integration** for credit purchases.

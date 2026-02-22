@@ -1,6 +1,23 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [3.12.1] - 2026-02-22
+
+### Changed
+- **UI Refinements (Creation Form)**:
+    - **Hidden Inputs**: "Script (Speech)" and "Image Prompt" text areas are now completely hidden until their respective Generate buttons are clicked or until content is populated (e.g., from favorites or upload).
+    - **Disabled State**: Text areas are explicitly disabled and show a "Generating..." or "Refining..." placeholder with a visual fade (`opacity-50`) while awaiting AI response to prevent typing before generation completes.
+    - **Button Styling**: Updated the "Generate Speech" and "Generate Image Prompt" buttons to use vibrant gradients (purple/pink and blue/indigo) and larger styling, creating a cohesive design language matching the primary "Next" button.
+
+### Fixed
+- **Credit Refund Logic (Veo)**:
+    - Fixed an issue where credits were permanently deducted if the Veo video generation failed mid-process.
+    - Added a robust `increment_credits` Supabase RPC call within the `catch` block of `generateVideoWithVeo` to guarantee refunds upon failure.
+    - Implemented `creditsDeducted` flag tracking to ensure refunds only occur if the deduction was successful.
+- **Error Visibility in Production**:
+    - Refactored server actions (`gemini-video.ts`, `gemini-image.ts`, `gemini.ts`) to return structured result objects `{ success: boolean, data/url/error: string }` instead of throwing raw exceptions.
+    - Prevented Next.js from masking critical API error messages (like rate limits or prompt blocks) with generic "Server Components render" errors in the production environment.
+
 ## [3.12.0] - 2026-02-21
 
 ### Added
