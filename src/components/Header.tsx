@@ -350,6 +350,15 @@ export default function Header({ user: initialUser }: HeaderProps) {
                                 <span>Tutorial</span>
                             </Link>
 
+                            <Link
+                                href="/about"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors"
+                            >
+                                <span className="font-bold">ℹ️</span>
+                                <span>{language === 'pt' ? 'Sobre Nós' : 'About Us'}</span>
+                            </Link>
+
                             {role === 'admin' && (
                                 <Link
                                     href="/admin"

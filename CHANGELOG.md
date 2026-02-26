@@ -1,6 +1,21 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+## [4.1.0] - 2026-02-26
+
+### Added
+- **SEO-Optimized "About Us" Page** (`/about`):
+    - Created a new page following the "5 Golden Rules" for AI Search optimization.
+    - **Hero Section (H1)**: Clear definition formula identifying the SaaS, target audience, and value proposition.
+    - **What We Do (H2)**: Specific service list (Gemini Scripts, Imagen 3D Characters, Veo Lip-Sync, Dynamic Scenarios, Logo Insertion).
+    - **Who Is It For (H2)**: Authority signals and real-world use cases (restaurants, agencies, mobile-first platforms).
+    - **Global Reach**: Bilingual support paragraph (BR + International) with geographic market signals.
+    - **Internal Links**: Strategic `<Link>` tags to `/credits` and `/login` woven into the copywriting.
+    - **FAQ Accordion**: 3 interactive questions with answers, including pricing links.
+    - **Schema.org JSON-LD**: Dual structured data (`SoftwareApplication` + `FAQPage`) for search engine visibility.
+    - **Full i18n**: Complete English and Portuguese translations.
+- **Header**: Added "About Us" / "Sobre Nós" link to the hamburger navigation menu.
+
 ## [4.0.0] - 2026-02-22
 
 ### Major Changes
