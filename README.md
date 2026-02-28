@@ -2,14 +2,15 @@
 
 A Next.js application designed to create viral "Talking Objects" videos for Instagram Reels and TikTok. It leverages the power of Google's **Gemini** for scriptwriting, **Imagen** for high-quality 3D image generation, and **Veo** for video animation.
 
-## ✨ Features (v4.1.0 Shiny SaaS Edition)
+## ✨ Features (v4.2.0 Shiny SaaS Edition)
 
 -   **📱 Mobile-First Design**:
     -   **V4 UI Redesign**: Brand new "shiny and bubbly" futuristic aesthetic featuring frosted glass cards, neon glows, and 3D interactive buttons.
     -   **Dynamic Text Inputs**: Text areas (Script and AI Instructions) auto-resize smoothly to accommodate content natively without scrollbars.
     -   **Responsive UI**: Optimized for mobile devices with touch-friendly inputs.
     -   **App-Like Experience**: Native status bar integration, safe area handling, and smooth transitions.
-    -   **Wizard Flow**: Step-by-step creation process (Script -> Image -> Video) for simplicity. Dynamic inputs guide users and prevent editing before AI generation finishes.
+    -   **Wizard Flow**: **5-step linear creation wizard** (Character → Scene & Framing → Script → Image → Settings) with progress indicator dots, slide animations, smart field validation, and **automatic prompt invalidation** when scene/framing changes.
+    -   **Camera Framing Picker**: 6 illustrated photography composition options (Center, Low Angle, High Angle, Close-Up, Wide Shot, Rule of Thirds) to control character positioning.
     -   **Hamburger Menu**: Clean navigation with slide-out drawer for user settings.
     -   **Interactive Tutorial**: Beautiful animated `/tutorial` page explaining all features, fully localized in EN/PT, featuring real mobile-optimized app screenshots.
     -   **SEO About Page**: `/about` page optimized for Google and AI search with Schema.org structured data, strategic internal linking, and an FAQ accordion.
@@ -103,13 +104,13 @@ A Next.js application designed to create viral "Talking Objects" videos for Inst
 
 ## 📝 Usage
 
-1.  **Configure**: Enter the object name (e.g., "A Coffee Cup"), select an emotion, and provide a context/reason.
-2.  **Generate Script**: Click the "Gerar com IA" button to let Gemini write the script.
-3.  **Create**: Click "Gerar Vídeo Viral". The app will:
-    -   Refine the prompt.
-    -   Generate the 3D image (Imagen).
-    -   Animate the video (Veo).
-4.  **Download**: Once done, preview the video and click "Baixar MP4".
+1.  **Step 1 — Character**: Enter the object name (e.g., "A Coffee Cup"), select an emotion, and provide a reason.
+2.  **Step 2 — Scene & Framing**: Choose a background scenario and camera framing position.
+3.  **Step 3 — Script**: Generate an AI script or write your own.
+4.  **Step 4 — Image**: Generate the image prompt with AI or upload your own image.
+5.  **Step 5 — Settings**: Choose voice style, upload a logo, and click "Generate Image".
+6.  **Approve & Animate**: Review the generated image, then animate it into a video with Veo.
+7.  **Download**: Preview and download your MP4.
 
 ## 🤝 Contributing
 

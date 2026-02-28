@@ -62,6 +62,8 @@ export default function Home() {
   const [videoQuality, setVideoQuality] = useState<'fast' | 'quality'>('fast');
   // Video Duration selection (Default: 6s)
   const [videoDuration, setVideoDuration] = useState<6 | 8>(6);
+  // Framing position (Default: center)
+  const [framing, setFraming] = useState("center");
 
   const handleViralMode = () => {
     if (language === 'pt') {
@@ -102,7 +104,7 @@ export default function Home() {
     }
   };
 
-  const handleRefinePrompt = async (scenarioContext: string) => {
+  const handleRefinePrompt = async (scenarioContext: string, framingContext: string) => {
     if (!formData.objectName || !formData.emotion || !formData.reason) {
       setError(language === 'pt' ? "Preencha Objeto, Emoção e Motivo primeiro." : "Please fill in Object, Emotion, and Reason first.");
       return;
@@ -110,7 +112,7 @@ export default function Home() {
     setError(null);
     setIsRefiningPrompt(true);
     try {
-      const result = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel, scenarioContext);
+      const result = await refinePromptV2(formData.objectName, formData.emotion, formData.reason, geminiModel, scenarioContext, framingContext);
       if (!result.success) throw new Error(result.error);
       setFormData(prev => ({ ...prev, prompt: result.data || "" }));
     } catch (e: any) {
@@ -218,6 +220,8 @@ export default function Home() {
               setVoiceStyle={setVoiceStyle}
               logoImage={logoImage}
               setLogoImage={setLogoImage}
+              framing={framing}
+              setFraming={setFraming}
               onSubmit={handleInitialSubmit}
               onGenerateScript={handleGenerateScript}
               onRefinePrompt={handleRefinePrompt}

@@ -1,6 +1,30 @@
 # Changelog
 
 All notable changes to the "AI Speaking Object" project will be documented in this file.
+
+## [4.2.0] - 2026-02-27
+
+### Major Changes
+- **Multi-Step Creation Wizard**:
+    - Replaced the single-page vertical form with a **5-step linear wizard** for a smoother mobile UX.
+    - **Step 1 — Character**: Object Name, Emotion, Reason.
+    - **Step 2 — Scene & Framing**: Background Scenario Selector + **NEW Camera Framing Picker** (6 illustrated options: Center, Low Angle, High Angle, Close-Up, Wide Shot, Rule of Thirds).
+    - **Step 3 — Script**: Speech generation with favorites.
+    - **Step 4 — Image**: AI Prompt generation or Upload (Create/Upload tabs).
+    - **Step 5 — Settings**: Voice Style, Logo, AI Model selection, and Submit.
+    - **Progress Indicator**: Numbered step dots with connecting lines showing current position, completed steps marked with ✓.
+    - **Smart Validation**: "Next" button disabled until step-specific required fields are filled.
+    - **Slide Animations**: Smooth left/right slide transitions between steps.
+    - **Smart Prompt Invalidation**: If the user changes the scenario or framing after generating a prompt and navigates back, the old prompt is automatically cleared to force regeneration with the new settings.
+
+### Added
+- **Camera Framing Picker**: 6 photography composition options with icons and descriptions, allowing users to control how the character is positioned in the frame. The selected framing is automatically injected into the image prompt.
+
+### Fixed
+- **Prompt Duplication Bug**: Fixed `refinePromptV2` template where `${scenarioContext}` appeared twice, causing the background description to repeat in the generated prompt.
+- **Framing Override**: Replaced hardcoded `"Close-up shot, centered composition"` in the prompt template with the user's actual framing selection.
+- **Clean Prompt Architecture**: Scenario (background) and Framing (camera composition) are now passed as **separate parameters** to the AI, preventing concatenation artifacts.
+
 ## [4.1.0] - 2026-02-26
 
 ### Added

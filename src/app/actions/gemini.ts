@@ -69,10 +69,11 @@ export async function generateScript(objectName: string, emotion: string, reason
   }
 }
 
-export async function refinePromptV2(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", scenarioContext: string = "standing on a wooden restaurant table, facing the camera directly. The background is a slightly out-of-focus restaurant setting with a family sitting in the background"): Promise<{ success: boolean; data?: string; error?: string }> {
+export async function refinePromptV2(objectName: string, emotion: string, reason: string, modelName: string = "gemini-2.5-flash", scenarioContext: string = "standing on a wooden restaurant table, facing the camera directly. The background is a slightly out-of-focus restaurant setting with a family sitting in the background", framingContext: string = "centered in the frame, hero shot"): Promise<{ success: boolean; data?: string; error?: string }> {
   console.log("Refining prompt [V2 - Dynamic]...");
   console.log("Using Gemini Model:", modelName);
   console.log("Scenario Context:", scenarioContext);
+  console.log("Framing Context:", framingContext);
 
   if (!apiKey) throw new Error("API Key do Gemini não configurada");
 
@@ -81,7 +82,11 @@ export async function refinePromptV2(objectName: string, emotion: string, reason
 
   const instructionV2 = `
     Você é um especialista em prompts para geradores de imagem 3D. O usuário fornecerá um objeto e uma emoção. Sua saída deve ser APENAS o prompt em inglês, seguindo esta estrutura estrita:
-    'A 3D render of a [Objeto] character with a face, ${scenarioContext}, facing the camera directly. The character has LARGE, DISTINCT EYES and a MOUTH. It is expressing [Emoção] because of [Motivo]. Pixar style, high detail, studio lighting. ${scenarioContext}, providing context but keeping the object as the main focus. Close-up shot, centered composition, making sure the face is the primary focus. Vertical 9:16 aspect ratio.'
+    'A 3D render of a [Objeto] character with a face, ${scenarioContext}, facing the camera directly. The character has LARGE, DISTINCT EYES and a MOUTH. It is expressing [Emoção] because of [Motivo]. Pixar style, high detail, studio lighting. ${framingContext}, making sure the face is the primary focus. Vertical 9:16 aspect ratio.'
+    
+    IMPORTANT RULES:
+    - Do NOT repeat the scenario/background description. It should appear only ONCE.
+    - The camera framing/composition is: ${framingContext}. Do NOT override this with a different framing.
     
     IMPORTANT SAFETY GUIDELINES:
     - Ensure the prompt is 100% Safe For Work (SFW).
