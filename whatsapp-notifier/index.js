@@ -32,13 +32,6 @@ async function testarConexaoSupabase() {
         const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
         if (error) throw error;
         console.log('✅ Conexão básica com Supabase OK!');
-
-        // Novo: Teste de permissão de publicação
-        console.log('🔍 Verificando se a tabela está na publicação do Realtime...');
-        const { data: pubData, error: pubError } = await supabase.rpc('check_realtime_pub', { t_name: 'profiles' }).catch(() => ({ data: null }));
-        // Se o RPC não existir, continuamos, mas logamos
-        if (pubError) console.log('⚠️ Aviso: RPC de checagem não disponível, seguindo com o Realtime...');
-
         return true;
     } catch (err) {
         console.error('❌ ERRO DE CONEXÃO: Não foi possível ler a tabela "profiles". Verifique sua internet e as chaves no .env');
