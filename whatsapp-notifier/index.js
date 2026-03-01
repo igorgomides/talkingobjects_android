@@ -34,14 +34,24 @@ client.on('ready', () => {
 function iniciarEscutaSupabase() {
     // Configurado para a tabela do app atual que armazena os perfis/usuários
     const nomeDaTabela = 'profiles';
+    console.log(`📡 Iniciando tentativa de conexão Realtime com a tabela "${nomeDaTabela}"...`);
 
-    supabase
+    const channel = supabase
         .channel('custom-insert-channel')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: nomeDaTabela }, (payload) => {
-            console.log('Novo usuário detectado!', payload.new);
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: nomeDaTabela
+        }, (payload) => {
+            console.log('🔔 EVENTO RECEBIDO!', payload);
 
             const novoUsuario = payload.new;
             const numeroAdmin = process.env.ADMIN_PHONE_NUMBER;
+
+            if (!novoUsuario) {
+                console.error('⚠️ Payload vazio recebido!');
+                return;
+            }
 
             const email = novoUsuario.email || 'Email não disponível';
             const name = novoUsuario.full_name || novoUsuario.name || 'Nome não disponível';
@@ -51,16 +61,27 @@ function iniciarEscutaSupabase() {
             client.sendMessage(numeroAdmin + '@c.us', mensagem).then(() => {
                 console.log('✅ Notificação enviada para o admin.');
             }).catch(err => {
-                console.error('❌ Erro ao enviar a notificação', err);
+                console.error('❌ Erro ao enviar a notificação para o WhatsApp:', err);
             });
         })
-        .subscribe((status) => {
+        .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-                console.log(`🎧 O bot está escutando inserções na tabela "${nomeDaTabela}"...`);
+                console.log(`🚀 CONECTADO! O bot está oficialmente escutando a tabela "${nomeDaTabela}".`);
+            } else if (status === 'CHANNEL_ERROR') {
+                console.error('❌ ERRO NO CANAL REALTIME:', err || 'Erro desconhecido. Verifique as chaves e o Realtime no Dashboard.');
+            } else if (status === 'TIMED_OUT') {
+                console.error('⏳ TIMEOUT: A conexão com o Realtime demorou muito.');
+            } else if (status === 'CLOSED') {
+                console.log('🔌 CONEXÃO FECHADA: O canal Realtime foi encerrado.');
             } else {
-                console.log('Status de inscrição do Realtime:', status);
+                console.log('🔄 Status da inscrição:', status);
             }
         });
+
+    // PING de teste para confirmar que o processo está vivo a cada 5 minutos
+    setInterval(() => {
+        console.log(`⏱️ Heartbeat: Bot continua ativo e escutando "${nomeDaTabela}"... (Status: ${channel.state})`);
+    }, 5 * 60 * 1000);
 }
 
 client.initialize();
