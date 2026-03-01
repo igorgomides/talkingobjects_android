@@ -12,7 +12,33 @@ if (!supabaseUrl || !supabaseKey || !adminPhoneNumber) {
     process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+    },
+    realtime: {
+        params: {
+            eventsPerSecond: 10,
+        },
+        timeout: 30000, // Aumentando timeout para 30 segundos
+    },
+});
+
+// Teste de conexão inicial
+async function testarConexaoSupabase() {
+    console.log('🔍 Testando conexão básica com o Supabase...');
+    try {
+        const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
+        if (error) throw error;
+        console.log('✅ Conexão básica com Supabase OK!');
+        return true;
+    } catch (err) {
+        console.error('❌ ERRO DE CONEXÃO: Não foi possível ler a tabela "profiles". Verifique sua internet e as chaves no .env');
+        console.error('Detalhe:', err.message);
+        return false;
+    }
+}
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -26,9 +52,14 @@ client.on('qr', (qr) => {
     console.log('👆 Escaneie o QR Code acima para conectar o Bot do WhatsApp.');
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log('✅ Bot do WhatsApp conectado e pronto para notificar!');
-    iniciarEscutaSupabase();
+    const conexaoOk = await testarConexaoSupabase();
+    if (conexaoOk) {
+        iniciarEscutaSupabase();
+    } else {
+        console.log('⚠️ Abortando escuta Realtime devido a erro de conexão básica.');
+    }
 });
 
 function iniciarEscutaSupabase() {
