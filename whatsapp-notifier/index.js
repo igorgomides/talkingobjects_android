@@ -5,10 +5,9 @@ const qrcode = require('qrcode-terminal');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const adminPhoneNumber = process.env.ADMIN_PHONE_NUMBER;
 
-if (!supabaseUrl || !supabaseKey || !adminPhoneNumber) {
-    console.error('❌ ERRO: Faltam variáveis de ambiente (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY ou ADMIN_PHONE_NUMBER) no arquivo .env');
+if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ ERRO: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não definidos no .env');
     process.exit(1);
 }
 
@@ -16,29 +15,8 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         persistSession: false,
         autoRefreshToken: false,
-    },
-    realtime: {
-        params: {
-            eventsPerSecond: 10,
-        },
-        timeout: 40000,         // Aumentando para 40 segundos
-    },
-});
-
-// Teste de conexão inicial
-async function testarConexaoSupabase() {
-    console.log('🔍 Testando conexão básica com o Supabase...');
-    try {
-        const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
-        if (error) throw error;
-        console.log('✅ Conexão básica com Supabase OK!');
-        return true;
-    } catch (err) {
-        console.error('❌ ERRO DE CONEXÃO: Não foi possível ler a tabela "profiles". Verifique sua internet e as chaves no .env');
-        console.error('Detalhe:', err.message);
-        return false;
     }
-}
+});
 
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -47,79 +25,95 @@ const client = new Client({
     }
 });
 
+let ultimoIdProcessado = null;
+
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
     console.log('👆 Escaneie o QR Code acima para conectar o Bot do WhatsApp.');
 });
 
 client.on('ready', async () => {
-    console.log('✅ Bot do WhatsApp conectado e pronto para notificar!');
-    const conexaoOk = await testarConexaoSupabase();
-    if (conexaoOk) {
-        iniciarEscutaSupabase();
+    console.log('✅ Bot do WhatsApp conectado e pronto!');
+
+    // Teste inicial e busca do último ID já existente
+    const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    if (error) {
+        console.error('❌ Erro ao acessar Supabase:', error.message);
     } else {
-        console.log('⚠️ Abortando escuta Realtime devido a erro de conexão básica.');
+        if (profiles && profiles.length > 0) {
+            ultimoIdProcessado = profiles[0].id;
+            console.log(`📡 Bot iniciado. Último perfil monitorado (ID): ${ultimoIdProcessado}`);
+        } else {
+            console.log('📡 Bot iniciado. Nenhum perfil encontrado ainda.');
+        }
+
+        console.log('🚀 Iniciando monitoramento via POLLING (HTTP)...');
+        iniciarPolling();
     }
 });
 
-function iniciarEscutaSupabase(retryCount = 0) {
-    const maxRetries = 5;
-    const nomeDaTabela = 'profiles';
-    const channelName = 'realtime-notifier';
+async function verificarNovosUsuarios() {
+    try {
+        let query = supabase
+            .from('profiles')
+            .select('id, email, full_name, created_at')
+            .order('created_at', { ascending: true });
 
-    // Remove canal anterior se existir para evitar canais duplicados/travados
-    supabase.removeChannel(supabase.channel(channelName));
-
-    console.log(`📡 Tentativa ${retryCount + 1}: Conectando ao Realtime ("${nomeDaTabela}")...`);
-
-    const channel = supabase
-        .channel(channelName)
-        .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: nomeDaTabela
-        }, (payload) => {
-            console.log('🔔 EVENTO RECEBIDO!', payload);
-
-            const novoUsuario = payload.new;
-            const numeroAdmin = process.env.ADMIN_PHONE_NUMBER;
-
-            if (!novoUsuario) return;
-
-            const email = novoUsuario.email || 'Email não disponível';
-            const name = novoUsuario.full_name || novoUsuario.name || 'Nome não disponível';
-
-            const mensagem = `🚨 *Novo Cadastro!*\n\nNome: ${name}\nEmail: ${email}\nData: ${new Date().toLocaleString('pt-BR')}\n\nO app está crescendo! 🚀`;
-
-            client.sendMessage(numeroAdmin + '@c.us', mensagem).then(() => {
-                console.log('✅ Notificação enviada para o admin.');
-            }).catch(err => {
-                console.error('❌ Erro no WhatsApp:', err.message);
-            });
-        })
-        .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') {
-                console.log(`🚀 CONECTADO! Escutando a tabela "${nomeDaTabela}".`);
-            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                console.error(`⚠️ Falha (Status: ${status}). Erro:`, err ? err.message : 'Timeout/Erro de rede.');
-
-                if (retryCount < maxRetries) {
-                    const delay = (retryCount + 1) * 5000;
-                    console.log(`🔄 Tentando novamente em ${delay / 1000}s... (${retryCount + 1}/${maxRetries})`);
-                    setTimeout(() => iniciarEscutaSupabase(retryCount + 1), delay);
-                } else {
-                    console.error('🚫 Limite de tentativas atingido. Verifique o Realtime no Dashboard do Supabase.');
-                }
-            } else {
-                console.log('🔄 Status da inscrição:', status);
+        // Se já temos um ID, buscamos apenas os posteriores
+        if (ultimoIdProcessado) {
+            // Nota: Se o ID for UUID, ordernar por created_at é mais seguro
+            // Vamos buscar registros criados após o último que vimos
+            const { data: lastProfile } = await supabase.from('profiles').select('created_at').eq('id', ultimoIdProcessado).single();
+            if (lastProfile) {
+                query = query.gt('created_at', lastProfile.created_at);
             }
-        });
+        }
 
-    if (retryCount === 0) {
-        setInterval(() => {
-            console.log(`⏱️ Status Realtime: ${channel.state}`);
-        }, 2 * 60 * 1000);
+        const { data: novosUsuarios, error } = await query;
+
+        if (error) throw error;
+
+        if (novosUsuarios && novosUsuarios.length > 0) {
+            console.log(`🔔 ${novosUsuarios.length} novo(s) usuário(s) detectado(s)!`);
+
+            for (const user of novosUsuarios) {
+                // Evita duplicatas se buscar exatamente o que já processou
+                if (user.id === ultimoIdProcessado) continue;
+
+                await enviarNotificacao(user);
+                ultimoIdProcessado = user.id;
+            }
+        }
+    } catch (err) {
+        console.error('⚠️ Erro no polling:', err.message);
     }
+}
+
+async function enviarNotificacao(user) {
+    const numeroAdmin = process.env.ADMIN_PHONE_NUMBER;
+    const email = user.email || 'Email não disponível';
+    const name = user.full_name || 'Nome não disponível';
+
+    const mensagem = `🚨 *Novo Cadastro!*\n\nNome: ${name}\nEmail: ${email}\nData: ${new Date(user.created_at).toLocaleString('pt-BR')}\n\nO app está crescendo! 🚀`;
+
+    try {
+        await client.sendMessage(numeroAdmin + '@c.us', mensagem);
+        console.log(`✅ Notificação enviada para: ${email}`);
+    } catch (err) {
+        console.error('❌ Erro ao enviar WhatsApp:', err.message);
+    }
+}
+
+function iniciarPolling() {
+    // Verifica a cada 20 segundos
+    setInterval(verificarNovosUsuarios, 20000);
+    // Executa a primeira vez imediatamente
+    verificarNovosUsuarios();
 }
 
 client.initialize();
