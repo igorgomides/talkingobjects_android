@@ -21,7 +21,12 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
         params: {
             eventsPerSecond: 10,
         },
-        timeout: 30000, // Aumentando timeout para 30 segundos
+        config: {
+            broadcast: { self: true },
+            presence: { key: 'bot' },
+        },
+        transport: 'websocket', // Forçando o uso de WebSockets
+        timeout: 40000,         // Aumentando para 40 segundos
     },
 });
 
