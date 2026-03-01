@@ -63,13 +63,17 @@ client.on('ready', async () => {
 });
 
 function iniciarEscutaSupabase(retryCount = 0) {
-    const maxRetries = 3;
-    // Configurado para a tabela do app atual que armazena os perfis/usuários
+    const maxRetries = 5;
     const nomeDaTabela = 'profiles';
-    console.log(`📡Tentativa ${retryCount + 1}: Iniciando conexão Realtime com "${nomeDaTabela}"...`);
+    const channelName = 'realtime-notifier';
+
+    // Remove canal anterior se existir para evitar canais duplicados/travados
+    supabase.removeChannel(supabase.channel(channelName));
+
+    console.log(`📡 Tentativa ${retryCount + 1}: Conectando ao Realtime ("${nomeDaTabela}")...`);
 
     const channel = supabase
-        .channel('custom-insert-channel')
+        .channel(channelName)
         .on('postgres_changes', {
             event: 'INSERT',
             schema: 'public',
@@ -80,10 +84,7 @@ function iniciarEscutaSupabase(retryCount = 0) {
             const novoUsuario = payload.new;
             const numeroAdmin = process.env.ADMIN_PHONE_NUMBER;
 
-            if (!novoUsuario) {
-                console.error('⚠️ Payload vazio recebido!');
-                return;
-            }
+            if (!novoUsuario) return;
 
             const email = novoUsuario.email || 'Email não disponível';
             const name = novoUsuario.full_name || novoUsuario.name || 'Nome não disponível';
@@ -93,34 +94,31 @@ function iniciarEscutaSupabase(retryCount = 0) {
             client.sendMessage(numeroAdmin + '@c.us', mensagem).then(() => {
                 console.log('✅ Notificação enviada para o admin.');
             }).catch(err => {
-                console.error('❌ Erro ao enviar a notificação para o WhatsApp:', err);
+                console.error('❌ Erro no WhatsApp:', err.message);
             });
         })
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-                console.log(`🚀 CONECTADO! O bot está oficialmente escutando a tabela "${nomeDaTabela}".`);
-            } else if (status === 'CHANNEL_ERROR') {
-                console.error('❌ ERRO NO CANAL REALTIME:', err || 'Erro desconhecido.');
-            } else if (status === 'TIMED_OUT') {
-                console.error('⏳ TIMEOUT na conexão Realtime.');
+                console.log(`🚀 CONECTADO! Escutando a tabela "${nomeDaTabela}".`);
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                console.error(`⚠️ Falha (Status: ${status}). Erro:`, err ? err.message : 'Timeout/Erro de rede.');
+
                 if (retryCount < maxRetries) {
-                    console.log(`🔄 Tentando reconectar em 5 segundos... (${retryCount + 1}/${maxRetries})`);
-                    setTimeout(() => iniciarEscutaSupabase(retryCount + 1), 5000);
+                    const delay = (retryCount + 1) * 5000;
+                    console.log(`🔄 Tentando novamente em ${delay / 1000}s... (${retryCount + 1}/${maxRetries})`);
+                    setTimeout(() => iniciarEscutaSupabase(retryCount + 1), delay);
                 } else {
-                    console.error('🚫 Limite de tentativas de conexão Realtime atingido.');
+                    console.error('🚫 Limite de tentativas atingido. Verifique o Realtime no Dashboard do Supabase.');
                 }
-            } else if (status === 'CLOSED') {
-                console.log('🔌 CONEXÃO FECHADA pelo servidor.');
             } else {
                 console.log('🔄 Status da inscrição:', status);
             }
         });
 
-    // PING de teste para confirmar que o processo está vivo a cada 5 minutos
     if (retryCount === 0) {
         setInterval(() => {
-            console.log(`⏱️ Heartbeat: Bot continua ativo (Status: ${channel.state})`);
-        }, 5 * 60 * 1000);
+            console.log(`⏱️ Status Realtime: ${channel.state}`);
+        }, 2 * 60 * 1000);
     }
 }
 
