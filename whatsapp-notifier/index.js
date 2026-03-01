@@ -32,6 +32,13 @@ async function testarConexaoSupabase() {
         const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
         if (error) throw error;
         console.log('✅ Conexão básica com Supabase OK!');
+
+        // Novo: Teste de permissão de publicação
+        console.log('🔍 Verificando se a tabela está na publicação do Realtime...');
+        const { data: pubData, error: pubError } = await supabase.rpc('check_realtime_pub', { t_name: 'profiles' }).catch(() => ({ data: null }));
+        // Se o RPC não existir, continuamos, mas logamos
+        if (pubError) console.log('⚠️ Aviso: RPC de checagem não disponível, seguindo com o Realtime...');
+
         return true;
     } catch (err) {
         console.error('❌ ERRO DE CONEXÃO: Não foi possível ler a tabela "profiles". Verifique sua internet e as chaves no .env');
@@ -62,10 +69,11 @@ client.on('ready', async () => {
     }
 });
 
-function iniciarEscutaSupabase() {
+function iniciarEscutaSupabase(retryCount = 0) {
+    const maxRetries = 3;
     // Configurado para a tabela do app atual que armazena os perfis/usuários
     const nomeDaTabela = 'profiles';
-    console.log(`📡 Iniciando tentativa de conexão Realtime com a tabela "${nomeDaTabela}"...`);
+    console.log(`📡Tentativa ${retryCount + 1}: Iniciando conexão Realtime com "${nomeDaTabela}"...`);
 
     const channel = supabase
         .channel('custom-insert-channel')
@@ -99,20 +107,28 @@ function iniciarEscutaSupabase() {
             if (status === 'SUBSCRIBED') {
                 console.log(`🚀 CONECTADO! O bot está oficialmente escutando a tabela "${nomeDaTabela}".`);
             } else if (status === 'CHANNEL_ERROR') {
-                console.error('❌ ERRO NO CANAL REALTIME:', err || 'Erro desconhecido. Verifique as chaves e o Realtime no Dashboard.');
+                console.error('❌ ERRO NO CANAL REALTIME:', err || 'Erro desconhecido.');
             } else if (status === 'TIMED_OUT') {
-                console.error('⏳ TIMEOUT: A conexão com o Realtime demorou muito.');
+                console.error('⏳ TIMEOUT na conexão Realtime.');
+                if (retryCount < maxRetries) {
+                    console.log(`🔄 Tentando reconectar em 5 segundos... (${retryCount + 1}/${maxRetries})`);
+                    setTimeout(() => iniciarEscutaSupabase(retryCount + 1), 5000);
+                } else {
+                    console.error('🚫 Limite de tentativas de conexão Realtime atingido.');
+                }
             } else if (status === 'CLOSED') {
-                console.log('🔌 CONEXÃO FECHADA: O canal Realtime foi encerrado.');
+                console.log('🔌 CONEXÃO FECHADA pelo servidor.');
             } else {
                 console.log('🔄 Status da inscrição:', status);
             }
         });
 
     // PING de teste para confirmar que o processo está vivo a cada 5 minutos
-    setInterval(() => {
-        console.log(`⏱️ Heartbeat: Bot continua ativo e escutando "${nomeDaTabela}"... (Status: ${channel.state})`);
-    }, 5 * 60 * 1000);
+    if (retryCount === 0) {
+        setInterval(() => {
+            console.log(`⏱️ Heartbeat: Bot continua ativo (Status: ${channel.state})`);
+        }, 5 * 60 * 1000);
+    }
 }
 
 client.initialize();
